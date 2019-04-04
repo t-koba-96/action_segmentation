@@ -1,0 +1,14 @@
+annotation_ex.xlsx
+mogi_data/
+real_data/
+runs/
+weight/
+result/
+__pycache__/
+.jpynb_checkpoints/
+.DS_Store
+runs/__pycache__
+models/__pycache__
+utils/__pycache__
+weight/__pycache__
+.ipynb_checkpoints/
