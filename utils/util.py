@@ -35,3 +35,10 @@ def one_hot_3d(labels,class_num):
    
     return y_onehot
 
+
+def normalize_heatmap(x):
+    min = x.min()
+    max = x.max()
+    result = (x-min)/(max-min)
+    return result
+

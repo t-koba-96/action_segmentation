@@ -32,7 +32,7 @@ lr=0.0002
 beta1=0.5
 
 # save file name (tensorboard , weight)
-file_name="tcn"
+file_name="tcn_4"
 
 #gpu activate
 device=torch.device('cuda:0')

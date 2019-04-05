@@ -169,6 +169,7 @@ def show_attention(images,net,device,save_name):
    heatmap = attention[0,:,:,:]
    heatmap = heatmap.numpy()
    heatmap = np.average(heatmap,axis=0)
+   heatmap = util.normalize_heatmap(heatmap)
    # 元の画像と同じサイズになるようにヒートマップのサイズを変更
    heatmap = cv2.resize(heatmap, (img.shape[1], img.shape[0]))
    #特徴ベクトルを256スケール化
