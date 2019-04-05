@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from utils import util,dataset,loader,test
 from models import cnn,network
 
+
 #batch size
 batch_size=2
 

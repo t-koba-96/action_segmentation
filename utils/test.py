@@ -76,7 +76,6 @@ def create_data_csv(testloader,net,device,class_num,csv_name):
 
 
 
-
 def create_demo_csv(testloader,net,device,classes,csv_name):
    num=[]
    Frame=[]

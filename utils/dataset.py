@@ -89,7 +89,6 @@ def label_loader(label_path,frame_indices):
     return label
 
 
-
 #datasetを作るクラス
 class Video(data.Dataset):
     def __init__(self, video_path_list,label_path_list,image_size,sample_duration,step,

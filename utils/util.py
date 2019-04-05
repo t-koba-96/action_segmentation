@@ -11,12 +11,12 @@ def imshape(image):
     npimg=image.numpy()
     return np.transpose(npimg,(1,2,0))
 
+
 def imshow(img):
     img=img/2+0.5
     npimg=img.numpy()
     plt.imshow(np.transpose(npimg,(1,2,0)))
     plt.show
-
 
 
 def one_hot_2d(labels,class_num):
@@ -26,6 +26,7 @@ def one_hot_2d(labels,class_num):
     y_onehot.scatter_(1, y, 1)
    
     return y_onehot
+
 
 def one_hot_3d(labels,class_num):
     y = labels.view(labels.size(0),labels.size(1),-1)

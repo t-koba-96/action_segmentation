@@ -7,6 +7,7 @@ import datas
 from models import cnn,network
 from utils import util,dataset,loader,train
 
+
 #batch size
 batch_size=2
 
