@@ -14,7 +14,7 @@ class Chomp1d(nn.Module):
 
 
 class ResidualBlock(nn.Module):
-    def __init__(self, n_inputs, n_outputs, kernel_size, stride, dilation, padding, dropout=0.2):
+    def __init__(self, n_inputs, n_outputs, kernel_size, stride, dilation, padding, dropout=0.2, causal=True):
         super(ResidualBlock, self).__init__()
         self.conv1 = weight_norm(nn.Conv1d(n_inputs, n_outputs, kernel_size,
                                            stride=stride, padding=padding, dilation=dilation))
@@ -28,9 +28,12 @@ class ResidualBlock(nn.Module):
         self.relu2 = nn.ReLU()
         self.dropout2 = nn.Dropout(dropout)
 
+        self.causal = causal
         # input length = output length
-        self.net = nn.Sequential(self.conv1, self.chomp1, self.relu1, self.dropout1,
+        self.causal_net = nn.Sequential(self.conv1, self.chomp1, self.relu1, self.dropout1,
                                  self.conv2, self.chomp2, self.relu2, self.dropout2)
+        self.non_causal_net = nn.Sequential(self.conv1, self.relu1, self.dropout1,
+                                 self.conv2, self.relu2, self.dropout2)
         self.downsample = nn.Conv1d(n_inputs, n_outputs, 1) if n_inputs != n_outputs else None
         self.relu = nn.ReLU()
         self.init_weights()
@@ -42,7 +45,7 @@ class ResidualBlock(nn.Module):
             self.downsample.weight.data.normal_(0, 0.01)
 
     def forward(self, x):
-        out = self.net(x)
+        out = self.causal_net(x) if self.causal is True else self.non_causal_net(x)
         # if input and output channel different , need down sampling
         res = x if self.downsample is None else self.downsample(x)
         #skip connection 

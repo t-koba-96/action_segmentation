@@ -21,7 +21,7 @@ clip_length=63
 dataset_slide=10
 
 #epochs
-num_epochs=2
+num_epochs=3
 
 #class number
 class_num=11

@@ -43,20 +43,16 @@ class vgg(nn.Module):
 
 # attention layer (sigmoid)
 class attention_sigmoid(nn.Module):
-    def __init__(self,feat):
+    def __init__(self):
         super(attention_sigmoid, self).__init__()
         
         self.conv1 = nn.Conv2d(512,512,3,1,1)
         self.conv2 = nn.Conv2d(512,512,3,1,1)
-        self.feat = feat
-        self.normalize = False
+        self.normalize = nn.InstanceNorm2d(512)
 
     def forward(self, x):
                
-        y = torch.sigmoid(self.conv2(x))
-
-        if self.normalize is not False:
-            y = util.normalize_attention_conv(y,512,self.feat)
+        y = torch.sigmoid(self.normalize(self.conv2(x)))
 
         x = F.relu((self.conv1(x))*y)
 
@@ -74,7 +70,7 @@ class at_vgg(nn.Module):
            features.append((vgg16(pretrained = True).features)[i])
         
         #attention_ReLu() or attention_sigmoid()
-        features.append(attention_sigmoid(14))
+        features.append(attention_sigmoid())
         
         for i in range(3):
            features.append((vgg16(pretrained = True).features)[i+28])
@@ -125,10 +121,11 @@ class attention_net(nn.Module):
         
         for ii,model in enumerate(self.features):
            
-          if ii in {26}:
+            if ii in {26}:
                #sigmoid or ReLu
-               y = torch.sigmoid(model.conv2(x))
-          else:
+               y = torch.sigmoid(model.normalize(model.conv2(x)))
+               
+            else:
                x = model(x)
 
         return y

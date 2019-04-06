@@ -100,7 +100,7 @@ class Video(data.Dataset):
                             transforms.Resize(image_size),
                             transforms.CenterCrop(image_size),
                             transforms.ToTensor(),
-                            transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5])
+                            transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
                              ])
 
         self.one_hot_label = one_hot_label
