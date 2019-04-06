@@ -1,7 +1,11 @@
 import torch
 
 
-def train_path_list(start,end):
+def train_path_list(number):
+
+    video_list=[]
+    label_list=[]
+
     video_path_list=["../../../local/dataset/work_detect/mogi_data/worker_a/image_a/train/",
                      "../../../local/dataset/work_detect/mogi_data/worker_b/image_b/train/",
                      "../../../local/dataset/work_detect/mogi_data/worker_c/image_c/train/",
@@ -13,11 +17,19 @@ def train_path_list(start,end):
                      "../../../local/dataset/work_detect/mogi_data/worker_c/class_c/train.csv",
                      "../../../local/dataset/work_detect/mogi_data/worker_d/class_d/train.csv",
                      "../../../local/dataset/work_detect/mogi_data/worker_e/class_e/train.csv"]
+    
+    for data in number:
+       video_list.append(video_path_list[data-1])
+       label_list.append(label_path_list[data-1])
 
-    return video_path_list[start-1:end],label_path_list[start-1:end]
+    return video_list,label_list
 
 
-def test_path_list(start,end):
+def test_path_list(number):
+
+    video_list=[]
+    label_list=[]
+
     video_path_list=["../../../local/dataset/work_detect/mogi_data/worker_a/image_a/test/",
                      "../../../local/dataset/work_detect/mogi_data/worker_b/image_b/test/",
                      "../../../local/dataset/work_detect/mogi_data/worker_c/image_c/test/",
@@ -30,7 +42,11 @@ def test_path_list(start,end):
                      "../../../local/dataset/work_detect/mogi_data/worker_d/class_d/test.csv",
                      "../../../local/dataset/work_detect/mogi_data/worker_e/class_e/test.csv"]
 
-    return video_path_list[start-1:end],label_path_list[start-1:end]
+    for data in number:
+       video_list.append(video_path_list[data-1])
+       label_list.append(label_path_list[data-1])
+
+    return video_list,label_list
 
 def class_list():
     class_list=["n","tp","al","ac","ca","gd","as","hp","st","ch","co"]

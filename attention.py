@@ -17,7 +17,7 @@ batch_size=2
 image_size=224
 
 #clip_length
-clip_length=60
+clip_length=63
 
 #class number
 class_num=11
@@ -26,7 +26,7 @@ class_num=11
 file_name="tcn"
 
 #csv_name
-save_name="e_1"
+save_name="working_a_test"
 
 #gpu activate
 device=torch.device('cuda:0')
@@ -35,7 +35,7 @@ device=torch.device('cuda:0')
 classes=datas.class_list()
 
 #worker_num(start,end)
-video_path_list,label_path_list=datas.test_path_list(5,5)
+video_path_list,label_path_list=datas.test_path_list([1])
 
 #Video(videopathlist,labelpathlist,image_size,clip_length,slide_num)
 frameloader=dataset.Video(video_path_list,label_path_list,image_size,clip_length,clip_length,class_num)

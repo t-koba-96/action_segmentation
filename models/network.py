@@ -51,7 +51,7 @@ class attention_tcn(nn.Module):
 
         self.avgpool =  nn.AdaptiveAvgPool2d((1,1))
 
-        self.tcn = tcn.Dilated_TCN(512,[64,96,class_num])
+        self.tcn = tcn.Dilated_TCN(512,[256,128,64,32,class_num])
         
         
     def forward(self, x):

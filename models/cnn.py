@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from torchvision.models import vgg16
 import torch.nn.functional as F
+from utils import util
 
 #vgg16
 class vgg(nn.Module):
@@ -42,16 +43,21 @@ class vgg(nn.Module):
 
 # attention layer (sigmoid)
 class attention_sigmoid(nn.Module):
-    def __init__(self):
+    def __init__(self,feat):
         super(attention_sigmoid, self).__init__()
         
         self.conv1 = nn.Conv2d(512,512,3,1,1)
         self.conv2 = nn.Conv2d(512,512,3,1,1)
-
+        self.feat = feat
+        self.normalize = False
 
     def forward(self, x):
                
         y = torch.sigmoid(self.conv2(x))
+
+        if self.normalize is not False:
+            y = util.normalize_attention_conv(y,512,self.feat)
+
         x = F.relu((self.conv1(x))*y)
 
         return x
@@ -68,7 +74,7 @@ class at_vgg(nn.Module):
            features.append((vgg16(pretrained = True).features)[i])
         
         #attention_ReLu() or attention_sigmoid()
-        features.append(attention_sigmoid())
+        features.append(attention_sigmoid(14))
         
         for i in range(3):
            features.append((vgg16(pretrained = True).features)[i+28])

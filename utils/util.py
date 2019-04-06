@@ -43,3 +43,13 @@ def normalize_heatmap(x):
     result = (x-min)/(max-min)
     return result
 
+def normalize_attention_conv(x,channel,feat):
+    x=x.view(-1,channel,feat*feat)
+    max,_=x.max(dim=2)
+    max=max.view(-1,channel,1)
+    min,_=x.min(dim=2)
+    min=min.view(-1,channel,1)
+    result = ((x-min)/(max-min)).view(-1,channel,feat,feat)
+    
+    return result
+    

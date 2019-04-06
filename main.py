@@ -15,7 +15,7 @@ batch_size=2
 image_size=224
 
 #clip_length
-clip_length=60
+clip_length=63
 
 #dataset_slide
 dataset_slide=10
@@ -33,13 +33,13 @@ lr=0.0002
 beta1=0.5
 
 # save file name (tensorboard , weight)
-file_name="tcn_4"
+file_name="tcn"
 
 #gpu activate
 device=torch.device('cuda:0')
 
 #worker_num(start,end)
-video_path_list,label_path_list=datas.train_path_list(1,5)
+video_path_list,label_path_list=datas.train_path_list([1,3,4,5])
 
 #Video(videopathlist,labelpathlist,image_size,clip_length,slide_num)
 frameloader=dataset.Video(video_path_list,label_path_list,image_size,clip_length,dataset_slide,class_num)
