@@ -32,7 +32,7 @@ def make_dataset(video_path_list,label_path_list, sample_duration, step):
         
         n_frames = len(os.listdir(v_path))
 
-        for i in range(0, (n_frames - sample_duration + 1), step):
+        for i in range(0,  (n_frames - sample_duration + 1) , step):
             sample_i = copy.deepcopy(sample)
             sample_i['video'] = v_path
             sample_i['label'] = label_path_list[num]

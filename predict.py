@@ -23,7 +23,7 @@ class_num=11
 file_name="tcn"
 
 #csv_name
-csv_name="working_a_test"
+csv_name="working_b_test"
 
 #gpu activate
 device=torch.device('cuda:0')
@@ -32,7 +32,7 @@ device=torch.device('cuda:0')
 classes=datas.class_list()
 
 #worker_num(start,end)
-video_path_list,label_path_list=datas.test_path_list([1])
+video_path_list,label_path_list=datas.test_path_list([2])
 
 #Video(videopathlist,labelpathlist,image_size,clip_length,slide_num)
 frameloader=dataset.Video(video_path_list,label_path_list,image_size,clip_length,clip_length,class_num)
