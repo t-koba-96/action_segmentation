@@ -76,7 +76,7 @@ def create_data_csv(testloader,net,device,class_num,csv_name):
 
 
 
-def create_demo_csv(testloader,net,device,classes,csv_name):
+def create_demo_csv(testloader,net,device,classes,csv_name,clip_length):
    num=[]
    Frame=[]
    c_s_l=[]
@@ -131,7 +131,26 @@ def create_demo_csv(testloader,net,device,classes,csv_name):
             hp_.append(outputs_np[x,7])
             st_.append(outputs_np[x,8])
             ch_.append(outputs_np[x,9])
-            co_.append(outputs_np[x,10])
+            co_.append(outputs_np[x,10]) 
+
+   for x in range(2400%clip_length):
+            c_s_l.append(classes[0])
+            c_l_n.append(0)
+            c_s_t.append(classes[0])
+            c_t_n.append(0)
+            t_s.append(0)
+            n_.append(0)
+            tp_.append(0)
+            al_.append(0)
+            ac_.append(0)
+            ca_.append(0)
+            gd_.append(0)
+            as_.append(0)
+            hp_.append(0)
+            st_.append(0)
+            ch_.append(0)
+            co_.append(0)
+   
          
    df = pd.DataFrame({
                     'number' : num,
