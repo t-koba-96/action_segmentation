@@ -26,7 +26,7 @@ class_num=11
 file_name="tcn"
 
 #csv_name
-save_name="working_a_test"
+save_name="working_d"
 
 #gpu activate
 device=torch.device('cuda:0')
@@ -35,12 +35,12 @@ device=torch.device('cuda:0')
 classes=datas.class_list()
 
 #worker_num(start,end)
-video_path_list,label_path_list=datas.test_path_list([1])
+video_path_list,label_path_list=datas.test_path_list([4])
 
 #Video(videopathlist,labelpathlist,image_size,clip_length,slide_num)
 frameloader=dataset.Video(video_path_list,label_path_list,image_size,clip_length,clip_length,class_num)
 
-testloader=torch.utils.data.DataLoader(frameloader,batch_size=batch_size,shuffle=True,num_workers=2,collate_fn=loader.my_collate_fn)
+testloader=torch.utils.data.DataLoader(frameloader,batch_size=batch_size,shuffle=False,num_workers=2,collate_fn=loader.my_collate_fn)
 
 #attention model
 net = network.attention_tcn(class_num)
@@ -52,7 +52,4 @@ at_net = cnn.attention_net(net)
 at_net = at_net.to(device)
 at_net.eval()
 
-#random images
-images,_,__=iter(testloader).next()
-
-test.show_attention(images,at_net,device,save_name)
+test.show_attention(testloader,at_net,device,save_name)

@@ -7,6 +7,8 @@ from . import util
 import cv2
 import matplotlib.pyplot as plt
 import torchvision.utils as vutils
+import sys
+sys.setrecursionlimit(1000000)
 
 def accuracy(testloader,net,device,csv_path):
    correct=0
@@ -175,38 +177,52 @@ def create_demo_csv(testloader,net,device,classes,csv_name,clip_length):
 
    df.to_csv(os.path.join("result","demo",csv_name+".csv"))
 
-def show_attention(images,net,device,save_name):
-   images_gpu = images.to(device)    
-   at_outputs=net(images_gpu)
-   at_predicted=at_outputs.cpu()
-   attention=at_predicted.detach()
-   
-   img=util.imshape(images[0,0,:,:,:])
+def show_attention(testloader,net,device,save_name):
 
-   #attention map
-   heatmap = attention[0,:,:,:]
-   heatmap = heatmap.numpy()
-   heatmap = np.average(heatmap,axis=0)
-   heatmap = util.normalize_heatmap(heatmap)
-   # 元の画像と同じサイズになるようにヒートマップのサイズを変更
-   heatmap = cv2.resize(heatmap, (img.shape[1], img.shape[0]))
-   #特徴ベクトルを256スケール化
-   heatmap = np.uint8(255 * heatmap)
-   # RGBに変更
-   heatmap = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
-   #戻す
-   heatmap=heatmap/255
-   # 0.5はヒートマップの強度係数
-   s_img = heatmap * 0.5 + img
+   with torch.no_grad():
+      for i,data in enumerate(testloader):
+         images,targets,labels=data
+         images_gpu = images.to(device)
+         outputs=net(images_gpu)
+         outputs=outputs.cpu()
+         attention=outputs.detach()
+         f_num=images.size(0)*images.size(1)*i
+         images=images.view(-1,3,images.size(3),images.size(4))
+         for x in range(images.size(0)):
+              img=util.imshape(images[x,:,:,:])
+              heatmap = attention[x,:,:,:]
+              make_attention_map(img,heatmap,f_num,save_name)
+              f_num+=1
 
-   #plt
-   image_list=[img,heatmap,s_img]
-   fig = plt.figure(figsize=(10, 10))
-   for i,data in enumerate(image_list):
-      fig.add_subplot(1, 3, i+1)
-      plt.imshow(data)
+
+def make_attention_map(img,heatmap,f_num,save_name):
+    #attention map
+    heatmap = heatmap.numpy()
+    heatmap = np.average(heatmap,axis=0)
+    heatmap = util.normalize_heatmap(heatmap)
+    # 元の画像と同じサイズになるようにヒートマップのサイズを変更
+    heatmap = cv2.resize(heatmap, (img.shape[1], img.shape[0]))
+    #特徴ベクトルを256スケール化
+    heatmap = np.uint8(255 * heatmap)
+    # RGBに変更
+    heatmap = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
+    #戻す
+    heatmap=heatmap/255
+    # 0.5はヒートマップの強度係数
+    s_img = heatmap * 0.5 + img
+
+    #plt
+    image_list=[img,heatmap,s_img]
+    fig = plt.figure(figsize=(10, 10))
+    for i,data in enumerate(image_list):
+       fig.add_subplot(1, 3, i+1)
+       plt.imshow(data)
+
+    # Make the directory if it doesn't exist.
+    if not os.path.exists(os.path.join("result","image",save_name)):
+        os.makedirs(os.path.join("result","image",save_name))
       
-   plt.savefig(os.path.join("result","image",save_name+".png"))
-   #plt.show()
+    plt.savefig(os.path.join("result","image",save_name,str(f_num).zfill(5)+".png"))
+    plt.close()
    
  

@@ -40,9 +40,8 @@ def one_hot_3d(labels,class_num):
 def normalize_heatmap(x):
 
     # choose min (0 or smallest scalar)
-    min = 0
-    #min = x.min()
 
+    min = x.min()
     max = x.max()
     
     result = (x-min)/(max-min)
