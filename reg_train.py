@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.optim as optim
 import numpy as np
 import datas
-from models import cnn,network
+from models import regression
 from utils import util,dataset,loader,train
 
 
@@ -21,10 +21,7 @@ clip_length=63
 dataset_slide=10
 
 #epochs
-num_epochs=4
-
-#class number
-class_num=11
+num_epochs=3 
 
 #learning rate
 lr=0.0002
@@ -33,7 +30,7 @@ lr=0.0002
 beta1=0.5
 
 # save file name (tensorboard , weight)
-file_name="tcn_1at"
+file_name="reg"
 
 #gpu activate
 device=torch.device('cuda:0')
@@ -47,15 +44,15 @@ frameloader=dataset.Video(video_path_list,label_path_list,pose_path_list,image_s
 trainloader=torch.utils.data.DataLoader(frameloader,batch_size=batch_size,shuffle=True,num_workers=2,collate_fn=loader.my_collate_fn)
 
 #network
-net = network.attention_tcn(class_num)
+net = regression.r_attention_tcn()
 net = nn.DataParallel(net)
 net = net.to(device)
 
 #cross  entropy
-criterion=nn.CrossEntropyLoss()
+criterion=nn.MSELoss()
 
 #adam
 optimizer=optim.Adam(net.parameters(),lr=lr,betas=(beta1,0.999))
 
 #training
-train.model_train(trainloader,net,criterion,optimizer,device,num_epochs,file_name)
+train.regression_train(trainloader,net,criterion,optimizer,device,num_epochs,file_name)

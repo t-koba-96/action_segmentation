@@ -7,15 +7,14 @@ from . import util
 import cv2
 import matplotlib.pyplot as plt
 import torchvision.utils as vutils
-import sys
-sys.setrecursionlimit(1000000)
+from matplotlib.gridspec import GridSpec,GridSpecFromSubplotSpec
 
 def accuracy(testloader,net,device,csv_path):
    correct=0
    total=0
    with torch.no_grad():
       for data in testloader:
-         images,targets,labels=data
+         images,targets,labels,poses=data
          images = images.to(device)
          outputs=net(images)
          outputs=outputs.cpu()
@@ -41,7 +40,7 @@ def create_data_csv(testloader,net,device,class_num,csv_name):
 
    with torch.no_grad():
       for data in testloader:
-         images,targets,labels=data
+         images,targets,labels,poses=data
          images = images.to(device)
          outputs=net(images)
          outputs=outputs.cpu()
@@ -105,7 +104,7 @@ def create_demo_csv(testloader,net,device,classes,csv_name,clip_length):
 
    with torch.no_grad():
       for i,data in enumerate(testloader):
-         images,targets,labels=data
+         images,targets,labels,poses=data
          images = images.to(device)
          outputs=net(images)
          outputs=outputs.cpu()
@@ -181,7 +180,7 @@ def show_attention(testloader,net,device,save_name):
 
    with torch.no_grad():
       for i,data in enumerate(testloader):
-         images,targets,labels=data
+         images,targets,labels,poses=data
          images_gpu = images.to(device)
          outputs=net(images_gpu)
          outputs=outputs.cpu()
@@ -210,19 +209,29 @@ def make_attention_map(img,heatmap,f_num,save_name):
     heatmap=heatmap/255
     # 0.5はヒートマップの強度係数
     s_img = heatmap * 0.5 + img
-
     #plt
-    image_list=[img,heatmap,s_img]
-    fig = plt.figure(figsize=(10, 10))
-    for i,data in enumerate(image_list):
-       fig.add_subplot(1, 3, i+1)
-       plt.imshow(data)
+    fig=plt.figure(figsize=(16,10))
+    gs = GridSpec(4,5,left=0.13,right=0.9) 
+    gs.update(wspace=-0.01)
+    gs_1 = GridSpecFromSubplotSpec(nrows=4, ncols=3, subplot_spec=gs[0:4, 0:3])
+    fig.add_subplot(gs_1[:, :])
+    util.delete_line()
+    plt.imshow(s_img)
+    gs_2 = GridSpecFromSubplotSpec(nrows=2, ncols=2, subplot_spec=gs[0:2, 3:5])
+    fig.add_subplot(gs_2[:,:])
+    util.delete_line()
+    plt.imshow(img)
+    gs_3 = GridSpecFromSubplotSpec(nrows=2, ncols=2, subplot_spec=gs[2:4, 3:5])
+    fig.add_subplot(gs_3[:,:])
+    util.delete_line()
+    plt.imshow(heatmap)
 
     # Make the directory if it doesn't exist.
-    if not os.path.exists(os.path.join("result","image",save_name)):
-        os.makedirs(os.path.join("result","image",save_name))
+    SAVE_PATH = "../../../demo/images/attention"
+    if not os.path.exists(os.path.join(SAVE_PATH,save_name)):
+        os.makedirs(os.path.join(SAVE_PATH,save_name))
       
-    plt.savefig(os.path.join("result","image",save_name,str(f_num).zfill(5)+".png"))
+    plt.savefig(os.path.join(SAVE_PATH,save_name,str(f_num).zfill(5)+".png"))
     plt.close()
    
  

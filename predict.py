@@ -20,10 +20,10 @@ clip_length=63
 class_num=11
 
 #weight_file_name
-file_name="tcn"
+file_name="tcn_1at"
 
 #csv_name
-csv_name="working_e"
+csv_name="working_c_1at"
 
 #gpu activate
 device=torch.device('cuda:0')
@@ -32,10 +32,10 @@ device=torch.device('cuda:0')
 classes=datas.class_list()
 
 #worker_num(start,end)
-video_path_list,label_path_list=datas.test_path_list([5])
+video_path_list,label_path_list,pose_path_list=datas.test_path_list([3])
 
 #Video(videopathlist,labelpathlist,image_size,clip_length,slide_num)
-frameloader=dataset.Video(video_path_list,label_path_list,image_size,clip_length,clip_length,class_num)
+frameloader=dataset.Video(video_path_list,label_path_list,pose_path_list,image_size,clip_length,clip_length,class_num)
 
 testloader=torch.utils.data.DataLoader(frameloader,batch_size=batch_size,shuffle=False,num_workers=2,collate_fn=loader.my_collate_fn)
 

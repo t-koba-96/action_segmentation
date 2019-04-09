@@ -17,7 +17,7 @@ import torchvision.transforms as transforms
 #”segment（始まりと終わりのフレーム）、別"
 #"frame_indices(要素のフレーム番号)、別"
 #を記述
-def make_dataset(video_path_list,label_path_list, sample_duration, step):
+def make_dataset(video_path_list,label_path_list,pose_path_list, sample_duration, step):
     dataset = []
 
     #動画のフレーム長
@@ -36,6 +36,7 @@ def make_dataset(video_path_list,label_path_list, sample_duration, step):
             sample_i = copy.deepcopy(sample)
             sample_i['video'] = v_path
             sample_i['label'] = label_path_list[num]
+            sample_i['pose'] = pose_path_list[num]
             sample_i['frame_indices'] = list(range(i, i + sample_duration))
             sample_i['segment'] = torch.IntTensor([num, i, i + sample_duration - 1])
             dataset.append(sample_i)
@@ -88,13 +89,23 @@ def label_loader(label_path,frame_indices):
 
     return label
 
+def pose_loader(pose_path,frame_indices):
+    pose = []
+    for i in frame_indices:
+        if os.path.exists(pose_path):
+            pose.append(torch.as_tensor(pd.read_csv(pose_path).iloc[i,0:4]))
+        else:
+            return pose
+
+    return pose
+
 
 #datasetを作るクラス
 class Video(data.Dataset):
-    def __init__(self, video_path_list,label_path_list,image_size,sample_duration,step,
-                 class_num,one_hot_label=None,temporal_transform=None,get_loader=get_default_video_loader):
+    def __init__(self, video_path_list,label_path_list,pose_path_list,image_size,sample_duration,step,
+                 class_num,one_hot_label=None,temporal_transform=None,get_loader=get_default_video_loader,pose_label=True):
 
-        self.data = make_dataset(video_path_list,label_path_list, sample_duration, step)
+        self.data = make_dataset(video_path_list,label_path_list,pose_path_list, sample_duration, step)
 
         self.spatial_transform = transforms.Compose([
                             transforms.Resize(image_size),
@@ -104,6 +115,7 @@ class Video(data.Dataset):
                              ])
 
         self.one_hot_label = one_hot_label
+        self.pose_label = pose_label
 
         self.temporal_transform = temporal_transform
         self.loader = get_loader()
@@ -124,30 +136,36 @@ class Video(data.Dataset):
         #各indexにおける要素のリスト
         frame_indices = self.data[index]['frame_indices']
 
+        #clip
         clip = self.loader(path, frame_indices)
-
-        #csvへのパス
-        l_path = self.data[index]['label']
-
-        label = label_loader(l_path,frame_indices)
-    
         #空間的な後処理
         if self.spatial_transform is not None:
             clip = [self.spatial_transform(img) for img in clip]
-
         #(sequence,channel,height,width)
         clip = torch.stack(clip, 0)
         #(channel,sequence,height,width)にしたい場合
         #clip = torch.stack(clip, 0).permute(1,0,2,3)
 
-        label = torch.stack(label,0)
-        
-        if self.one_hot_label is not None:
-            label =  util.one_hot_2d(label,self.cl_num)
-        
+        #target
         target = self.data[index]['segment']
 
-        return clip,target,label
+        #label
+        l_path = self.data[index]['label']
+        label = label_loader(l_path,frame_indices)
+        label = torch.stack(label,0)
+        if self.one_hot_label is not None:
+            label =  util.one_hot_2d(label,self.cl_num)
+
+        #pose
+        if self.pose_label is not None:
+            p_path = self.data[index]['pose']
+            pose = pose_loader(p_path,frame_indices)
+            pose = torch.stack(pose,0)
+        else:
+            pose=0
+
+        return clip,target,label,pose
+        
 
     def __len__(self):
         return len(self.data)

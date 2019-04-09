@@ -47,4 +47,13 @@ def normalize_heatmap(x):
     result = (x-min)/(max-min)
     return result
 
+def delete_line():
+    ax = plt.gca() # get current axis
+    ax.tick_params(labelbottom="off",bottom="off") # x軸の削除
+    ax.tick_params(labelleft="off",left="off") # y軸の削除
+    plt.gca().spines['right'].set_visible(False)
+    plt.gca().spines['top'].set_visible(False)
+    plt.gca().spines['left'].set_visible(False)
+    plt.gca().spines['bottom'].set_visible(False)
+    ax.set_xticklabels([]) 
     
