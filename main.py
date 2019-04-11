@@ -33,7 +33,7 @@ lr=0.0002
 beta1=0.5
 
 # save file name (tensorboard , weight)
-file_name="tcn_1at"
+file_name="two__stream"
 
 #gpu activate
 device=torch.device('cuda:0')
@@ -47,7 +47,7 @@ frameloader=dataset.Video(video_path_list,label_path_list,pose_path_list,image_s
 trainloader=torch.utils.data.DataLoader(frameloader,batch_size=batch_size,shuffle=True,num_workers=2,collate_fn=loader.my_collate_fn)
 
 #network
-net = network.attention_tcn(class_num)
+net = network.twostream_tcn(class_num)
 net = nn.DataParallel(net)
 net = net.to(device)
 
@@ -58,4 +58,4 @@ criterion=nn.CrossEntropyLoss()
 optimizer=optim.Adam(net.parameters(),lr=lr,betas=(beta1,0.999))
 
 #training
-train.model_train(trainloader,net,criterion,optimizer,device,num_epochs,file_name)
+train.model_train(trainloader,net,criterion,optimizer,device,num_epochs,file_name,two_stream=True)

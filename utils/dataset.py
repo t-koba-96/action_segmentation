@@ -93,7 +93,7 @@ def pose_loader(pose_path,frame_indices):
     pose = []
     for i in frame_indices:
         if os.path.exists(pose_path):
-            pose.append(torch.as_tensor(pd.read_csv(pose_path).iloc[i,0:4]))
+            pose.append(torch.as_tensor(pd.read_csv(pose_path).iloc[i,0:4]).float())
         else:
             return pose
 

@@ -18,10 +18,13 @@ image_size=224
 clip_length=63
 
 #dataset_slide
-dataset_slide=10
+dataset_slide=1
 
 #epochs
 num_epochs=3 
+
+#class number
+class_num=11
 
 #learning rate
 lr=0.0002
@@ -44,7 +47,7 @@ frameloader=dataset.Video(video_path_list,label_path_list,pose_path_list,image_s
 trainloader=torch.utils.data.DataLoader(frameloader,batch_size=batch_size,shuffle=True,num_workers=2,collate_fn=loader.my_collate_fn)
 
 #network
-net = regression.r_attention_tcn()
+net = regression.r_vgg()
 net = nn.DataParallel(net)
 net = net.to(device)
 
@@ -52,7 +55,8 @@ net = net.to(device)
 criterion=nn.MSELoss()
 
 #adam
-optimizer=optim.Adam(net.parameters(),lr=lr,betas=(beta1,0.999))
+optimizer = optim.SGD(net.parameters(), lr = lr, momentum=0.9)
+#optimizer=optim.Adam(net.parameters(),lr=lr,betas=(beta1,0.999))
 
 #training
 train.regression_train(trainloader,net,criterion,optimizer,device,num_epochs,file_name)

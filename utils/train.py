@@ -3,7 +3,7 @@ import os
 from tensorboardX import SummaryWriter
 
 
-def model_train(trainloader,net,criterion,optimizer,device,num_epochs,file_name):
+def model_train(trainloader,net,criterion,optimizer,device,num_epochs,file_name,two_stream=False):
    #tensorboard file_path
    writer = SummaryWriter(os.path.join("runs",file_name))
    #training
@@ -19,12 +19,16 @@ def model_train(trainloader,net,criterion,optimizer,device,num_epochs,file_name)
            # get the inputs
            images, targets, labels, poses = data
            images, labels = images.to(device), labels.to(device)
-
+           if two_stream is not False:
+               poses = poses.to(device)
            # zero the parameter gradients
            optimizer.zero_grad()
 
            # forward + backward + optimize
-           outputs = net(images)
+           if two_stream is not False:
+               outputs = net(images,poses)
+           else:
+               outputs = net(images)
            loss = criterion(outputs, labels.view(-1))
            loss.backward()
            optimizer.step()
@@ -62,6 +66,11 @@ def regression_train(trainloader,net,criterion,optimizer,device,num_epochs,file_
         
            # get the inputs
            images, targets, labels, poses = data
+           poses=poses.view(-1,4)
+           poses[:,0]=(poses[:,0]/1920-0.5)
+           poses[:,1]=(poses[:,1]/1080-0.5)
+           poses[:,2]=(poses[:,2]/1920-0.5)
+           poses[:,3]=(poses[:,3]/1080-0.5)
            images, poses = images.to(device), poses.to(device)
 
            # zero the parameter gradients
@@ -69,7 +78,7 @@ def regression_train(trainloader,net,criterion,optimizer,device,num_epochs,file_
 
            # forward + backward + optimize
            outputs = net(images)
-           loss = criterion(outputs, poses.view(-1,4))
+           loss = torch.nn.functional.mse_loss(outputs, poses)
            loss.backward()
            optimizer.step()
 
