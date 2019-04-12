@@ -1,54 +1,97 @@
-from __future__ import print_function
 import torch
 import torch.nn as nn
+
 import numpy as np
 import datas
 import os
-from models import cnn,network
+import argparse
+
+from models import network
 from utils import dataset,loader,test,util
 
-#batch size
-batch_size=2
 
-#image size
-image_size=224
+"""default"""
 
-#clip_length
-clip_length=63
-
-#class number
-class_num=11
-
-#weight_file_name
-file_name="tcn_1at"
-
-#csv_name
-csv_name="working_c_1at"
-
-#gpu activate
-device=torch.device('cuda:0')
-
-#classes
-classes=datas.class_list()
-
-#worker_num(start,end)
-video_path_list,label_path_list,pose_path_list=datas.test_path_list([3])
-
-#Video(videopathlist,labelpathlist,image_size,clip_length,slide_num)
-frameloader=dataset.Video(video_path_list,label_path_list,pose_path_list,image_size,clip_length,clip_length,class_num)
-
-testloader=torch.utils.data.DataLoader(frameloader,batch_size=batch_size,shuffle=False,num_workers=2,collate_fn=loader.my_collate_fn)
-
-#model
-net = network.attention_tcn(class_num)
-net=nn.DataParallel(net)
-net.load_state_dict(torch.load(os.path.join("weight",file_name+".pth")))
-net=net.to(device)
-net.eval()
+MODEL='Twostream_TCN'
+BATCH_SIZE=2
+IMAGE_SIZE=224
+CLIP_LENGTH=63
+SLIDE_STRIDE=63
+CLASSES=11
+DEVICE='cuda:0'
+WEIGHT_PATH=MODEL+'_result/finish'
+RESULT_NAME=MODEL+'_b'
+TRAIN_VIDEO_LIST=[2]
 
 
-# make csv files 
+"""change parameters here"""
 
-test.create_data_csv(testloader,net,device,class_num,csv_name)
+def get_arguments():
 
-test.create_demo_csv(testloader,net,device,classes,csv_name,clip_length)
+    parser = argparse.ArgumentParser(description='training action segmentation network')
+
+    parser.add_argument("--model", type=str, default=MODEL,
+                        help="available models => Attention_TCN/Twostream_TCN/Dual_Attention_TCN")
+    parser.add_argument("--batch_size", type=int, default=BATCH_SIZE,
+                        help="batch size")
+    parser.add_argument("--image_size", type=int, default=IMAGE_SIZE,
+                        help="image size")
+    parser.add_argument("--clip_length", type=int, default=CLIP_LENGTH,
+                        help="number of video frames clipped")
+    parser.add_argument("--slide_stride", type=int, default=SLIDE_STRIDE,
+                        help="slide stride through dataset")
+    parser.add_argument("--classes", type=int, default=CLASSES,
+                        help="number of classification classes")
+    parser.add_argument("--device", type=str, default=DEVICE,
+                        help="gpu device")
+    parser.add_argument("--weight_path", type=str, default=WEIGHT_PATH,
+                        help="path for saved weights, tensorboard")
+    parser.add_argument("--result_name", type=str, default=RESULT_NAME,
+                        help="file name for saving csv results")
+    parser.add_argument("--train_list", type=list, default=TRAIN_VIDEO_LIST,
+                        help="video list using for training")
+
+    return parser.parse_args()
+
+
+if __name__ == '__main__':
+
+
+     device=torch.device(args.device)
+
+     classes=datas.class_list()
+
+     video_path_list,label_path_list,pose_path_list=datas.test_path_list(args.train_list)
+
+     frameloader=dataset.Video(video_path_list,label_path_list,pose_path_list,args.image_size,args.clip_length,args.slide_stride,args.classes)
+
+     testloader=torch.utils.data.DataLoader(frameloader,batch_size=args.batch_size,shuffle=False,num_workers=2,collate_fn=loader.my_collate_fn)
+
+     if args.model == 'Attention_TCN':
+         net = network.attention_tcn(args.classes)
+         net = nn.DataParallel(net)
+         net.load_state_dict(torch.load(os.path.join("weight",args.weight_path+".pth")))
+         net = net.to(args.device)
+         net.eval()
+         test.create_data_csv(testloader,net,args.device,args.classes,args.result_name,two_stream=False)
+         test.create_demo_csv(testloader,net,args.device,classes,args.result_name,args.clip_length,two_stream=False)
+
+     elif args.model == 'Twostream_TCN':
+         net = network.twostream_tcn(args.classes)
+         net = nn.DataParallel(net)
+         net.load_state_dict(torch.load(os.path.join("weight",args.weight_path+".pth")))
+         net = net.to(args.device)
+         net.eval()
+         test.create_data_csv(testloader,net,args.device,args.classes,args.result_name,two_stream=True)
+         test.create_demo_csv(testloader,net,args.device,classes,args.result_name,args.clip_length,two_stream=True)
+
+     elif args.model == 'Dual_Attention_TCN':
+         at_net = regression.r_at_vgg(args.classes)
+         at_net=nn.DataParallel(at_net)
+         net = network.dual_attention_tcn(args.classes,at_net)
+         net = nn.DataParallel(net)
+         net.load_state_dict(torch.load(os.path.join("weight",args.weight_path+".pth")))
+         net = net.to(args.device)
+         net.eval()
+         test.create_data_csv(testloader,net,args.device,args.classes,args.result_name,two_stream=False)
+         test.create_demo_csv(testloader,net,args.device,classes,args.result_name,args.clip_length,two_stream=False)

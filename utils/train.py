@@ -3,11 +3,11 @@ import os
 from tensorboardX import SummaryWriter
 
 
-def model_train(trainloader,net,criterion,optimizer,device,num_epochs,file_name,two_stream=False):
+def model_train(trainloader,net,criterion,optimizer,device,num_epoch,file_name,two_stream=False):
    #tensorboard file_path
    writer = SummaryWriter(os.path.join("runs",file_name))
    #training
-   for epoch in range(num_epochs):  
+   for epoch in range(num_epoch):  
   
        global_i=epoch*len(trainloader)
        running_loss = 0.0
@@ -44,11 +44,17 @@ def model_train(trainloader,net,criterion,optimizer,device,num_epochs,file_name,
            if i % 10 == 0:
                writer.add_scalar('train/train_loss', loss.item() , global_i)
 
+           #save weight
+           if i % 200 == 0:
+               if not os.path.exists(os.path.join("weight",file_name+"/")):
+                  os.makedirs(os.path.join("weight",file_name+"/"))
+               torch.save(net.state_dict(),os.path.join("weight",file_name,str(epoch+1).zfill(2)+"-"+str(i+1).zfill(5)+".pth"))
+
    print('Finished Training')
    writer.close()
-
-   #save weight
-   torch.save(net.state_dict(),os.path.join("weight",file_name+".pth"))
+   
+   #save weight 
+   torch.save(net.state_dict(),os.path.join("weight",file_name,"finish.pth"))
 
 
 def regression_train(trainloader,net,criterion,optimizer,device,num_epochs,file_name):
@@ -93,8 +99,15 @@ def regression_train(trainloader,net,criterion,optimizer,device,num_epochs,file_
            if i % 10 == 0:
                writer.add_scalar('train/train_loss', loss.item() , global_i)
 
+            #save weight
+           #if i % 200 == 0:
+           #    if not os.path.exists(os.path.join("weight",file_name+"/")):
+               #    os.makedirs(os.path.join("weight",file_name+"/"))
+           #torch.save(net.state_dict(),os.path.join("weight",file_name,str(epoch+1).zfill(2)+"-"+str(i+1).zfill(5)+".pth"))
+
    print('Finished Training')
    writer.close()
 
    #save weight
    torch.save(net.state_dict(),os.path.join("weight",file_name+".pth"))
+   #torch.save(net.state_dict(),os.path.join("weight",file_name,"finish.pth"))

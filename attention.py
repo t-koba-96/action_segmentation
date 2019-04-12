@@ -52,4 +52,4 @@ at_net = cnn.attention_net(net)
 at_net = at_net.to(device)
 at_net.eval()
 
-test.show_attention(testloader,at_net,device,save_name)
+test.show_attention(testloader,at_net,device,save_name,two_stream=False)

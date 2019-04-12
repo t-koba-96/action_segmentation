@@ -27,7 +27,7 @@ def accuracy(testloader,net,device,csv_path):
    return total,correct
 
 
-def create_data_csv(testloader,net,device,class_num,csv_name):
+def create_data_csv(testloader,net,device,class_num,csv_name,two_stream=False):
    classes=[]
    correct_=[]
    total_=[]
@@ -42,7 +42,12 @@ def create_data_csv(testloader,net,device,class_num,csv_name):
       for data in testloader:
          images,targets,labels,poses=data
          images = images.to(device)
-         outputs=net(images)
+         if two_stream is not False:
+               poses = poses.to(device)
+         if two_stream is not False:
+               outputs = net(images,poses)
+         else:
+               outputs = net(images)
          outputs=outputs.cpu()
          outputs=nn.Softmax(dim=1)(outputs)
          _,predicted=torch.max(outputs,1)
@@ -77,7 +82,7 @@ def create_data_csv(testloader,net,device,class_num,csv_name):
 
 
 
-def create_demo_csv(testloader,net,device,classes,csv_name,clip_length):
+def create_demo_csv(testloader,net,device,classes,csv_name,clip_length,two_stream=False):
    num=[]
    Frame=[]
    c_s_l=[]
@@ -106,7 +111,12 @@ def create_demo_csv(testloader,net,device,classes,csv_name,clip_length):
       for i,data in enumerate(testloader):
          images,targets,labels,poses=data
          images = images.to(device)
-         outputs=net(images)
+         if two_stream is not False:
+               poses = poses.to(device)
+         if two_stream is not False:
+               outputs = net(images,poses)
+         else:
+               outputs = net(images)
          outputs=outputs.cpu()
          outputs=nn.Softmax(dim=1)(outputs)
          best_score,predicted=torch.max(outputs,1)
@@ -176,13 +186,18 @@ def create_demo_csv(testloader,net,device,classes,csv_name,clip_length):
 
    df.to_csv(os.path.join("result","demo",csv_name+".csv"))
 
-def show_attention(testloader,net,device,save_name):
+def show_attention(testloader,net,device,save_name,two_stream=False):
 
    with torch.no_grad():
       for i,data in enumerate(testloader):
          images,targets,labels,poses=data
          images_gpu = images.to(device)
-         outputs=net(images_gpu)
+         if two_stream is not False:
+               poses = poses.to(device)
+         if two_stream is not False:
+               outputs = net(images,poses)
+         else:
+               outputs = net(images)
          outputs=outputs.cpu()
          attention=outputs.detach()
          f_num=images.size(0)*images.size(1)*i
