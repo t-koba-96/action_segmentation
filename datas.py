@@ -20,7 +20,7 @@ def train_path_list(number):
                      "../../../local/dataset/work_detect/mogi_data/worker_e/class_e/train.csv"]
 
     pose_path_list=[ "../../../local/dataset/work_detect/mogi_data/worker_a/pose_a/train.csv",
-   　　　　　　　　　"../../../local/dataset/work_detect/mogi_data/worker_b/pose_b/train.csv",
+                     "../../../local/dataset/work_detect/mogi_data/worker_b/pose_b/train.csv",
                      "../../../local/dataset/work_detect/mogi_data/worker_c/pose_c/train.csv",
                      "../../../local/dataset/work_detect/mogi_data/worker_d/pose_d/train.csv",
                      "../../../local/dataset/work_detect/mogi_data/worker_e/pose_e/train.csv"]

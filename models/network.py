@@ -131,11 +131,11 @@ class twostream_tcn(nn.Module):
         
         x = self.img_tcn(x)
 
-        x = torch.sigmoid(x.permute(0,2,1).view(-1,x.size(1)))
+        x = x.permute(0,2,1).view(-1,x.size(1))
         
         y = self.pose_tcn(y.permute(0,2,1))
         
-        y = torch.sigmoid(y.permute(0,2,1).view(-1,y.size(1)))
+        y = y.permute(0,2,1).view(-1,y.size(1))
 
         x = torch.add(x,y)
 

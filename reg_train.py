@@ -18,7 +18,7 @@ image_size=224
 clip_length=63
 
 #dataset_slide
-dataset_slide=1
+dataset_slide=10
 
 #epochs
 num_epochs=3 
