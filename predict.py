@@ -6,7 +6,7 @@ import datas
 import os
 import argparse
 
-from models import network
+from models import network,regression
 from utils import dataset,loader,test,util
 
 
@@ -54,8 +54,10 @@ def get_arguments():
     return parser.parse_args()
 
 
-if __name__ == '__main__':
 
+def main():
+
+     args = get_arguments()
 
      device=torch.device(args.device)
 
@@ -70,7 +72,7 @@ if __name__ == '__main__':
      if args.model == 'Attention_TCN':
          net = network.attention_tcn(args.classes)
          net = nn.DataParallel(net)
-         net.load_state_dict(torch.load(os.path.join("weight",args.weight_path+".pth")))
+         net.load_state_dict(torch.load(os.path.join("weight","main",args.weight_path+".pth")))
          net = net.to(args.device)
          net.eval()
          test.create_data_csv(testloader,net,args.device,args.classes,args.result_name,two_stream=False)
@@ -79,19 +81,23 @@ if __name__ == '__main__':
      elif args.model == 'Twostream_TCN':
          net = network.twostream_tcn(args.classes)
          net = nn.DataParallel(net)
-         net.load_state_dict(torch.load(os.path.join("weight",args.weight_path+".pth")))
+         net.load_state_dict(torch.load(os.path.join("weight","main",args.weight_path+".pth")))
          net = net.to(args.device)
          net.eval()
          test.create_data_csv(testloader,net,args.device,args.classes,args.result_name,two_stream=True)
          test.create_demo_csv(testloader,net,args.device,classes,args.result_name,args.clip_length,two_stream=True)
 
      elif args.model == 'Dual_Attention_TCN':
-         at_net = regression.r_at_vgg(args.classes)
-         at_net=nn.DataParallel(at_net)
-         net = network.dual_attention_tcn(args.classes,at_net)
+         pose_net = regression.r_at_vgg(args.classes)
+         pose_net=nn.DataParallel(pose_net)
+         net = network.dual_attention_tcn(args.classes,pose_net)
          net = nn.DataParallel(net)
-         net.load_state_dict(torch.load(os.path.join("weight",args.weight_path+".pth")))
+         net.load_state_dict(torch.load(os.path.join("weight","main",args.weight_path+".pth")))
          net = net.to(args.device)
          net.eval()
          test.create_data_csv(testloader,net,args.device,args.classes,args.result_name,two_stream=False)
          test.create_demo_csv(testloader,net,args.device,classes,args.result_name,args.clip_length,two_stream=False)
+
+
+if __name__ == '__main__':
+    main()

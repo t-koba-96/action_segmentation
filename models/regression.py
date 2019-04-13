@@ -8,7 +8,7 @@ from . import cnn
 
 #vgg with attention layer
 class r_at_vgg(nn.Module):
-    def __init__(self):
+    def __init__(self,class_num):
         super(r_at_vgg, self).__init__()
         features = list(cnn.at_vgg(class_num).features)
         self.features = nn.ModuleList(features)

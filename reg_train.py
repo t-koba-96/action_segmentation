@@ -12,7 +12,7 @@ from utils import util,dataset,loader,train
 
 """default"""
 
-MODEL='ATTENTION_VGG'
+MODEL='Attention_VGG'
 BATCH_SIZE=2
 IMAGE_SIZE=224
 CLIP_LENGTH=63
@@ -59,12 +59,11 @@ def get_arguments():
 
     return parser.parse_args()
 
-args = get_arguments()
 
 
+def main():
 
-if __name__ == '__main__':
-
+     args = get_arguments()
 
      device=torch.device(args.device)
 
@@ -76,10 +75,13 @@ if __name__ == '__main__':
 
      criterion=nn.MSELoss()
 
-     if args.model == 'Attention_TCN':
-         net = regression.r_at_vgg()
+     if args.model == 'Attention_VGG':
+         net = regression.r_at_vgg(args.classes)
          net = nn.DataParallel(net)
          net = net.to(args.device)
          optimizer=optim.Adam(net.parameters(),lr=args.lr,betas=(args.beta1,0.999))
-         train.model_train(trainloader,net,criterion,optimizer,args.device,args.epoch,args.result_name,two_stream=False)
          train.regression_train(trainloader,net,criterion,optimizer,args.device,args.epoch,args.result_name)
+
+
+if __name__ == '__main__':
+    main()

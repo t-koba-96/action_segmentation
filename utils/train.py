@@ -46,15 +46,15 @@ def model_train(trainloader,net,criterion,optimizer,device,num_epoch,file_name,t
 
            #save weight
            if i % 200 == 0:
-               if not os.path.exists(os.path.join("weight",file_name+"/")):
-                  os.makedirs(os.path.join("weight",file_name+"/"))
-               torch.save(net.state_dict(),os.path.join("weight",file_name,str(epoch+1).zfill(2)+"-"+str(i+1).zfill(5)+".pth"))
+               if not os.path.exists(os.path.join("weight","main",file_name+"/")):
+                  os.makedirs(os.path.join("weight","main",file_name+"/"))
+               torch.save(net.state_dict(),os.path.join("weight","main",file_name,str(epoch+1).zfill(2)+"-"+str(i+1).zfill(5)+".pth"))
 
    print('Finished Training')
    writer.close()
    
    #save weight 
-   torch.save(net.state_dict(),os.path.join("weight",file_name,"finish.pth"))
+   torch.save(net.state_dict(),os.path.join("weight","main",file_name,"finish.pth"))
 
 
 def regression_train(trainloader,net,criterion,optimizer,device,num_epoch,file_name):
@@ -101,12 +101,12 @@ def regression_train(trainloader,net,criterion,optimizer,device,num_epoch,file_n
 
             #save weight
            if i % 200 == 0:
-               if not os.path.exists(os.path.join("weight",file_name+"/")):
-                   os.makedirs(os.path.join("weight",file_name+"/"))
-            　 torch.save(net.state_dict(),os.path.join("weight",file_name,str(epoch+1).zfill(2)+"-"+str(i+1).zfill(5)+".pth"))
+               if not os.path.exists(os.path.join("weight","reg",file_name+"/")):
+                   os.makedirs(os.path.join("weight","reg",file_name+"/"))
+               torch.save(net.state_dict(),os.path.join("weight","reg",file_name,str(epoch+1).zfill(2)+"-"+str(i+1).zfill(5)+".pth"))
 
    print('Finished Training')
    writer.close()
 
    #save weight
-   torch.save(net.state_dict(),os.path.join("weight",file_name,"finish.pth"))
+   torch.save(net.state_dict(),os.path.join("weight","reg",file_name,"finish.pth"))

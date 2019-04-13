@@ -22,7 +22,7 @@ CLASSES=11
 LEARNING_RATE=0.0002
 BETA1=0.5
 DEVICE='cuda:0'
-ATTENTION_PATH='reg'
+ATTENTION_PATH='Attention_VGG_result/finish'
 RESULT_NAME=MODEL+'_result'
 TRAIN_VIDEO_LIST=[1,3,4,5]
 
@@ -62,12 +62,11 @@ def get_arguments():
 
     return parser.parse_args()
 
-args = get_arguments()
 
 
+def main():
 
-if __name__ == '__main__':
-
+     args = get_arguments()
 
      device=torch.device(args.device)
 
@@ -97,9 +96,13 @@ if __name__ == '__main__':
      elif args.model == 'Dual_Attention_TCN':
          at_net = regression.r_at_vgg(args.classes)
          at_net=nn.DataParallel(at_net)
-         at_net.load_state_dict(torch.load(os.path.join("weight",args.attention_path+".pth")))
+         at_net.load_state_dict(torch.load(os.path.join("weight","reg",args.attention_path+".pth")))
          net = network.dual_attention_tcn(args.classes,at_net)
          net = nn.DataParallel(net)
          net = net.to(args.device)
          optimizer=optim.Adam(net.parameters(),lr=args.lr,betas=(args.beta1,0.999))
          train.model_train(trainloader,net,criterion,optimizer,args.device,args.epoch,args.result_name,two_stream=False)
+
+
+if __name__ == '__main__':
+    main()
