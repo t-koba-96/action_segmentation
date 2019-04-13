@@ -3,7 +3,7 @@ mogi_data/
 real_data/
 runs/
 weight/*
-!weight/weight.README
+!weight/README.md
 result/
 __pycache__/
 .jpynb_checkpoints/
