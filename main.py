@@ -62,8 +62,9 @@ def get_arguments():
 
     return parser.parse_args()
 
-
 args = get_arguments()
+
+
 
 if __name__ == '__main__':
 

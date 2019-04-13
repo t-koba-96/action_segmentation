@@ -1,61 +1,85 @@
-from __future__ import print_function
 import torch
 import torch.nn as nn
 import torch.optim as optim
+
 import numpy as np
 import datas
+import argparse
+
 from models import regression
 from utils import util,dataset,loader,train
 
 
-#batch size
-batch_size=2
+"""default"""
 
-#image size
-image_size=224
+MODEL='ATTENTION_VGG'
+BATCH_SIZE=2
+IMAGE_SIZE=224
+CLIP_LENGTH=63
+SLIDE_STRIDE=10
+EPOCH=3
+CLASSES=11
+LEARNING_RATE=0.0002
+BETA1=0.5
+DEVICE='cuda:0'
+RESULT_NAME=MODEL+'_result'
+TRAIN_VIDEO_LIST=[1,3,4,5]
 
-#clip_length
-clip_length=63
 
-#dataset_slide
-dataset_slide=10
+"""change parameters here"""
 
-#epochs
-num_epochs=3 
+def get_arguments():
 
-#class number
-class_num=11
+    parser = argparse.ArgumentParser(description='training action segmentation network')
 
-#learning rate
-lr=0.0002
+    parser.add_argument("--model", type=str, default=MODEL,
+                        help="available models => Attention_VGG")
+    parser.add_argument("--batch_size", type=int, default=BATCH_SIZE,
+                        help="batch size")
+    parser.add_argument("--image_size", type=int, default=IMAGE_SIZE,
+                        help="image size")
+    parser.add_argument("--clip_length", type=int, default=CLIP_LENGTH,
+                        help="number of video frames clipped")
+    parser.add_argument("--slide_stride", type=int, default=SLIDE_STRIDE,
+                        help="slide stride through dataset")
+    parser.add_argument("--epoch", type=int, default=EPOCH,
+                        help="training epoch")
+    parser.add_argument("--classes", type=int, default=CLASSES,
+                        help="number of classification classes")
+    parser.add_argument("--lr", type=float, default=LEARNING_RATE,
+                        help="learning rate for optimizer")
+    parser.add_argument("--beta1", type=float, default=BETA1,
+                        help="hyperparam for adam")
+    parser.add_argument("--device", type=str, default=DEVICE,
+                        help="gpu device")
+    parser.add_argument("--result_name", type=str, default=RESULT_NAME,
+                        help="file name for saving weights, tensorboard")
+    parser.add_argument("--train_list", type=list, default=TRAIN_VIDEO_LIST,
+                        help="video list using for training")
 
-# beta1 hyperparam for adam
-beta1=0.5
+    return parser.parse_args()
 
-# save file name (tensorboard , weight)
-file_name="reg"
+args = get_arguments()
 
-#gpu activate
-device=torch.device('cuda:0')
 
-#worker_num(start,end)
-video_path_list,label_path_list,pose_path_list=datas.train_path_list([1,3,4,5])
 
-#Video(videopathlist,labelpathlist,image_size,clip_length,slide_num)
-frameloader=dataset.Video(video_path_list,label_path_list,pose_path_list,image_size,clip_length,dataset_slide,class_num)
+if __name__ == '__main__':
 
-trainloader=torch.utils.data.DataLoader(frameloader,batch_size=batch_size,shuffle=True,num_workers=2,collate_fn=loader.my_collate_fn)
 
-#network
-net = regression.r_at_vgg()
-net = nn.DataParallel(net)
-net = net.to(device)
+     device=torch.device(args.device)
 
-#cross  entropy
-criterion=nn.MSELoss()
+     video_path_list,label_path_list,pose_path_list=datas.train_path_list(args.train_list)
 
-#adam
-optimizer=optim.Adam(net.parameters(),lr=lr,betas=(beta1,0.999))
+     frameloader=dataset.Video(video_path_list,label_path_list,pose_path_list,args.image_size,args.clip_length,args.slide_stride,args.classes)
 
-#training
-train.regression_train(trainloader,net,criterion,optimizer,device,num_epochs,file_name)
+     trainloader=torch.utils.data.DataLoader(frameloader,batch_size=args.batch_size,shuffle=True,num_workers=2,collate_fn=loader.my_collate_fn)
+
+     criterion=nn.MSELoss()
+
+     if args.model == 'Attention_TCN':
+         net = regression.r_at_vgg()
+         net = nn.DataParallel(net)
+         net = net.to(args.device)
+         optimizer=optim.Adam(net.parameters(),lr=args.lr,betas=(args.beta1,0.999))
+         train.model_train(trainloader,net,criterion,optimizer,args.device,args.epoch,args.result_name,two_stream=False)
+         train.regression_train(trainloader,net,criterion,optimizer,args.device,args.epoch,args.result_name)

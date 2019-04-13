@@ -2,7 +2,8 @@ annotation_ex.xlsx
 mogi_data/
 real_data/
 runs/
-weight/
+weight/*
+!weight/weight.README
 result/
 __pycache__/
 .jpynb_checkpoints/
