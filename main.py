@@ -29,7 +29,7 @@ TRAIN_VIDEO_LIST=[1,3,4,5]
 
 """change parameters here"""
 
-def get_arguments():
+def get__arguments():
 
     parser = argparse.ArgumentParser(description='training action segmentation network')
 
@@ -62,11 +62,19 @@ def get_arguments():
 
     return parser.parse_args()
 
+def get_arguments():
+    
+    parser = argparse.ArgumentParser(description='training regression network')
+    parser.add_argument('arg', type=str, help='arguments file name')
+    parser.add_argument('--device', type=str, default='cuda:0', help='choose device')
 
+    return parser.parse_args()
 
 def main():
 
      args = get_arguments()
+
+     CONFIG = Dict(yaml.safe_load(open(os.path.join('arguments',args.arg+'.yaml')))
 
      device=torch.device(args.device)
 

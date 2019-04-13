@@ -28,7 +28,7 @@ TRAIN_VIDEO_LIST=[1,3,4,5]
 
 """change parameters here"""
 
-def get_arguments():
+def get__arguments():
 
     parser = argparse.ArgumentParser(description='training action segmentation network')
 
@@ -56,6 +56,14 @@ def get_arguments():
                         help="file name for saving weights, tensorboard")
     parser.add_argument("--train_list", type=list, default=TRAIN_VIDEO_LIST,
                         help="video list using for training")
+
+    return parser.parse_args()
+
+def get_arguments():
+    
+    parser = argparse.ArgumentParser(description='training regression network')
+    parser.add_argument('arg', type=str, help='arguments file name')
+    parser.add_argument('--device', type=str, default='cuda:0', help='choose device')
 
     return parser.parse_args()
 
