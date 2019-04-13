@@ -1,0 +1,38 @@
+#Saving , Loading File Name
+save_file: template
+
+
+#Model (Attention_TCN,Twostream_TCN,Dual_Attention_TCN)
+model: Attention_TCN
+
+#Regression model if using pose attention (Attention_VGG)
+reg_model: Attention_VGG
+
+
+#Dasaset setting
+classes: 11
+train_video_list: [1,2,3,4] 
+test_video_list: [5]
+
+
+#Dataloader setting
+batch_size: 2
+image_size: 224
+clip_length: 63
+slide_stride: 10
+num_workers: 2
+
+
+#Learning setting
+epoch: 3
+learning_rate: 0.0002
+beta1: 0.5
+
+
+#which batches weight using
+main_batch: finish
+#if using regression model
+reg_batch: finish
+
+
+

@@ -3,6 +3,8 @@ mogi_data/
 real_data/
 runs/
 weight/
+arguments/*
+!arguments/template.yaml
 result/
 __pycache__/
 .jpynb_checkpoints/

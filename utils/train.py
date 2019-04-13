@@ -59,7 +59,7 @@ def model_train(trainloader,net,criterion,optimizer,device,num_epoch,file_name,t
 
 def regression_train(trainloader,net,criterion,optimizer,device,num_epoch,file_name):
    #tensorboard file_path
-   writer = SummaryWriter(os.path.join("runs",file_name))
+   writer = SummaryWriter(os.path.join("runs","reg_"+file_name))
    #training
    for epoch in range(num_epoch):  
   
