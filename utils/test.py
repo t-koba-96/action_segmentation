@@ -27,7 +27,7 @@ def accuracy(testloader,net,device,csv_path):
    return total,correct
 
 
-def create_data_csv(testloader,net,device,class_num,csv_name,two_stream=False):
+def create_data_csv(testloader,video_num,net,device,class_num,csv_name,two_stream=False):
    classes=[]
    correct_=[]
    total_=[]
@@ -78,11 +78,11 @@ def create_data_csv(testloader,net,device,class_num,csv_name,two_stream=False):
                     'accuracy' : accuracy
    })
 
-   df.to_csv(os.path.join("result","data",csv_name+".csv"))
+   df.to_csv(os.path.join("result","data",csv_name+"_"+video_num+".csv"))
 
 
 
-def create_demo_csv(testloader,net,device,classes,csv_name,clip_length,two_stream=False):
+def create_demo_csv(testloader,video_num,net,device,classes,csv_name,clip_length,two_stream=False):
    num=[]
    Frame=[]
    c_s_l=[]
@@ -184,9 +184,9 @@ def create_demo_csv(testloader,net,device,classes,csv_name,clip_length,two_strea
                     'co' : co_
    })
 
-   df.to_csv(os.path.join("result","demo",csv_name+".csv"))
+   df.to_csv(os.path.join("result","demo",csv_name+"_"+video_num+".csv"))
 
-def show_attention(testloader,net,device,save_name,two_stream=False):
+def show_attention(testloader,video_num,net,device,save_name,two_stream=False):
 
    with torch.no_grad():
       for i,data in enumerate(testloader):
@@ -195,9 +195,9 @@ def show_attention(testloader,net,device,save_name,two_stream=False):
          if two_stream is not False:
                poses = poses.to(device)
          if two_stream is not False:
-               outputs = net(images,poses)
+               outputs = net(images_gpu,poses)
          else:
-               outputs = net(images)
+               outputs = net(images_gpu)
          outputs=outputs.cpu()
          attention=outputs.detach()
          f_num=images.size(0)*images.size(1)*i
@@ -205,11 +205,11 @@ def show_attention(testloader,net,device,save_name,two_stream=False):
          for x in range(images.size(0)):
               img=util.imshape(images[x,:,:,:])
               heatmap = attention[x,:,:,:]
-              make_attention_map(img,heatmap,f_num,save_name)
+              make_attention_map(img,heatmap,video_num,f_num,save_name)
               f_num+=1
 
 
-def make_attention_map(img,heatmap,f_num,save_name):
+def make_attention_map(img,heatmap,video_num,f_num,save_name):
     #attention map
     heatmap = heatmap.numpy()
     heatmap = np.average(heatmap,axis=0)
@@ -243,10 +243,10 @@ def make_attention_map(img,heatmap,f_num,save_name):
 
     # Make the directory if it doesn't exist.
     SAVE_PATH = "../../../demo/images/attention"
-    if not os.path.exists(os.path.join(SAVE_PATH,save_name)):
-        os.makedirs(os.path.join(SAVE_PATH,save_name))
+    if not os.path.exists(os.path.join(SAVE_PATH,save_name+"_"+video_num)):
+        os.makedirs(os.path.join(SAVE_PATH,save_name+"_"+video_num))
       
-    plt.savefig(os.path.join(SAVE_PATH,save_name,str(f_num).zfill(5)+".png"))
+    plt.savefig(os.path.join(SAVE_PATH,save_name+"_"+video_num,str(f_num).zfill(5)+".png"))
     plt.close()
    
  

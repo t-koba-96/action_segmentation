@@ -3,7 +3,7 @@ save_file: template
 
 
 #Model (Attention_TCN,Twostream_TCN,Dual_Attention_TCN)
-model: Attention_TCN
+model: Dual_Attention_TCN
 
 #Regression model if using pose attention (Attention_VGG)
 reg_model: Attention_VGG
@@ -12,7 +12,6 @@ reg_model: Attention_VGG
 #Dasaset setting
 classes: 11
 train_video_list: [1,2,3,4] 
-test_video_list: [5]
 
 
 #Dataloader setting

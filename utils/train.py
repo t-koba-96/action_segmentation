@@ -73,10 +73,10 @@ def regression_train(trainloader,net,criterion,optimizer,device,num_epoch,file_n
            # get the inputs
            images, targets, labels, poses = data
            poses=poses.view(-1,4)
-           poses[:,0]=(poses[:,0]/1920-0.5)
-           poses[:,1]=(poses[:,1]/1080-0.5)
-           poses[:,2]=(poses[:,2]/1920-0.5)
-           poses[:,3]=(poses[:,3]/1080-0.5)
+           #poses[:,0]=(poses[:,0]/1920-0.5)
+           #poses[:,1]=(poses[:,1]/1080-0.5)
+           #poses[:,2]=(poses[:,2]/1920-0.5)
+           #poses[:,3]=(poses[:,3]/1080-0.5)
            images, poses = images.to(device), poses.to(device)
 
            # zero the parameter gradients
