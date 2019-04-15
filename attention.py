@@ -49,8 +49,12 @@ def main():
          test_video_list.append(5)
      video_path_list,label_path_list,pose_path_list = datas.test_path_list(test_video_list)
 
-     frameloader = dataset.Video(video_path_list,label_path_list,pose_path_list,SETTING.image_size,SETTING.clip_length,SETTING.clip_length,SETTING.classes)
-     testloader = torch.utils.data.DataLoader(frameloader,batch_size=SETTING.batch_size,shuffle=False,num_workers=SETTING.num_workers,collate_fn=loader.my_collate_fn)
+     frameloader = dataset.Video(video_path_list,label_path_list,pose_path_list,
+                                 SETTING.image_size,SETTING.clip_length,
+                                 SETTING.clip_length,SETTING.classes)
+     testloader = torch.utils.data.DataLoader(frameloader,batch_size=SETTING.batch_size,
+                                                 shuffle=False,num_workers=SETTING.num_workers,
+                                                 collate_fn=loader.my_collate_fn)
 
      if SETTING.model == 'Attention_TCN':
          net = network.attention_tcn(SETTING.classes)

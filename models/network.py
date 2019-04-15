@@ -123,16 +123,18 @@ class twostream_tcn(nn.Module):
             
         # batch,feature,clip
         x = x.view(batch_size,clip_length,-1).permute(0,2,1)
+
+        x=torch.cat([x,y.permute(0,2,1)], dim=1)
         
         x = self.img_tcn(x)
 
         x = x.permute(0,2,1).view(-1,x.size(1))
         
-        y = self.pose_tcn(y.permute(0,2,1))
+        #y = self.pose_tcn(y.permute(0,2,1))
         
-        y = y.permute(0,2,1).view(-1,y.size(1))
+        #y = y.permute(0,2,1).view(-1,y.size(1))
 
-        x = torch.add(x,y)
+        #x = torch.add(x,y)
 
         return x
 

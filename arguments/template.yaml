@@ -23,7 +23,7 @@ num_workers: 2
 
 
 #Learning setting
-epoch: 3
+epoch: 4
 learning_rate: 0.0002
 beta1: 0.5
 

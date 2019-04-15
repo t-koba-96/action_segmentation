@@ -36,6 +36,8 @@ class r_at_vgg(nn.Module):
         x= x.view(x.size(0), -1)
         
         x= self.classifier(x)
+
+        x=torch.sigmoid(x)
             
         return x
 

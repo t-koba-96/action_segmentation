@@ -34,8 +34,12 @@ def main():
      device = torch.device(args.device)
 
      video_path_list,label_path_list,pose_path_list = datas.train_path_list(SETTING.train_video_list)
-     frameloader = dataset.Video(video_path_list,label_path_list,pose_path_list,SETTING.image_size,SETTING.clip_length,SETTING.slide_stride,SETTING.classes)
-     trainloader = torch.utils.data.DataLoader(frameloader,batch_size=SETTING.batch_size,shuffle=True,num_workers=SETTING.num_workers,collate_fn=loader.my_collate_fn)
+     frameloader = dataset.Video(video_path_list,label_path_list,pose_path_list,
+                                 SETTING.image_size,SETTING.clip_length,
+                                 SETTING.slide_stride,SETTING.classes)
+     trainloader = torch.utils.data.DataLoader(frameloader,batch_size=SETTING.batch_size,
+                                                 shuffle=True,num_workers=SETTING.num_workers,
+                                                 collate_fn=loader.my_collate_fn)
 
      criterion = nn.MSELoss()
 
