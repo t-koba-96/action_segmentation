@@ -47,7 +47,7 @@ def main():
          test_video_list.append(4)
      elif args.video == 'e':
          test_video_list.append(5)
-     video_path_list,label_path_list,pose_path_list = datas.test_path_list(test_video_list)
+     video_path_list,_,__,label_path_list,pose_path_list = datas.test_path_list(test_video_list)
 
      frameloader = dataset.Video(video_path_list,label_path_list,pose_path_list,
                                  SETTING.image_size,SETTING.clip_length,

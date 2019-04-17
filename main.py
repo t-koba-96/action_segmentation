@@ -32,14 +32,22 @@ def main():
      args = get_arguments()
      SETTING = Dict(yaml.safe_load(open(os.path.join('arguments',args.arg+'.yaml'))))
      device = torch.device(args.device)
+     video_path_list,left_cutout_path_list,right_cutout_path_list,label_path_list,pose_path_list = datas.train_path_list(SETTING.train_video_list)
+     
+     if SETTING.model == 'Cutout_TCN':
+         frameloader = dataset.Video(video_path_list,left_cutout_path_list,right_cutout_path_list,
+                                             label_path_list,pose_path_list,
+                                             SETTING.image_size,SETTING.clip_length,
+                                             SETTING.slide_stride,SETTING.classes,cutout_img=True)
 
-     video_path_list,label_path_list,pose_path_list = datas.train_path_list(SETTING.train_video_list)
-     frameloader = dataset.Video(video_path_list,label_path_list,pose_path_list,
-                                 SETTING.image_size,SETTING.clip_length,
-                                 SETTING.slide_stride,SETTING.classes)
+     else:
+         frameloader = dataset.Video(video_path_list,left_cutout_path_list,right_cutout_path_list,
+                                     label_path_list,pose_path_list,
+                                     SETTING.image_size,SETTING.clip_length,
+                                     SETTING.slide_stride,SETTING.classes)
+         
      trainloader = torch.utils.data.DataLoader(frameloader,batch_size=SETTING.batch_size,
-                                                 shuffle=True,num_workers=SETTING.num_workers,
-                                                 collate_fn=loader.my_collate_fn)
+                                                     shuffle=True,num_workers=SETTING.num_workers)
 
      criterion=nn.CrossEntropyLoss()
 
@@ -48,7 +56,7 @@ def main():
          net = nn.DataParallel(net)
          net = net.to(device)
          optimizer=optim.Adam(net.parameters(),lr=SETTING.learning_rate,betas=(SETTING.beta1,0.999))
-         train.model_train(trainloader,net,criterion,optimizer,device,SETTING.epoch,SETTING.save_file,two_stream=False)
+         train.model_train(trainloader,net,criterion,optimizer,device,SETTING.epoch,SETTING.save_file)
 
 
      elif SETTING.model == 'Twostream_TCN':
@@ -66,8 +74,14 @@ def main():
          net = nn.DataParallel(net)
          net = net.to(device)
          optimizer=optim.Adam(net.parameters(),lr=SETTING.learning_rate,betas=(SETTING.beta1,0.999))
-         train.model_train(trainloader,net,criterion,optimizer,device,SETTING.epoch,SETTING.save_file,two_stream=False)
+         train.model_train(trainloader,net,criterion,optimizer,device,SETTING.epoch,SETTING.save_file)
 
+     elif SETTING.model == 'Cutout_TCN':
+         net = network.cutout_tcn(SETTING.classes)
+         net = nn.DataParallel(net)
+         net = net.to(device)
+         optimizer=optim.Adam(net.parameters(),lr=SETTING.learning_rate,betas=(SETTING.beta1,0.999))
+         train.model_train(trainloader,net,criterion,optimizer,device,SETTING.epoch,SETTING.save_file,cutout_img=True)
 
 if __name__ == '__main__':
     main()

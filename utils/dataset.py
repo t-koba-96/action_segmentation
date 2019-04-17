@@ -17,7 +17,7 @@ import torchvision.transforms as transforms
 #”segment（始まりと終わりのフレーム）、別"
 #"frame_indices(要素のフレーム番号)、別"
 #を記述
-def make_dataset(video_path_list,label_path_list,pose_path_list, sample_duration, step):
+def make_dataset(video_path_list,left_cutout_path_list,right_cutout_path_list,label_path_list,pose_path_list, sample_duration, step):
     dataset = []
 
     #動画のフレーム長
@@ -35,6 +35,8 @@ def make_dataset(video_path_list,label_path_list,pose_path_list, sample_duration
         for i in range(0,  (n_frames - sample_duration + 1) , step):
             sample_i = copy.deepcopy(sample)
             sample_i['video'] = v_path
+            sample_i['left_cutout'] = left_cutout_path_list[num]
+            sample_i['right_cutout'] = right_cutout_path_list[num]
             sample_i['label'] = label_path_list[num]
             sample_i['pose'] = pose_path_list[num]
             sample_i['frame_indices'] = list(range(i, i + sample_duration))
@@ -102,10 +104,10 @@ def pose_loader(pose_path,frame_indices):
 
 #datasetを作るクラス
 class Video(data.Dataset):
-    def __init__(self, video_path_list,label_path_list,pose_path_list,image_size,sample_duration,step,
-                 class_num,one_hot_label=None,temporal_transform=None,get_loader=get_default_video_loader,pose_label=True):
+    def __init__(self, video_path_list,left_cutout_path_list,right_cutout_path_list,label_path_list,pose_path_list,image_size,sample_duration,step,
+                 class_num,one_hot_label=False,temporal_transform=False,get_loader=get_default_video_loader,cutout_img=False,pose_label=True):
 
-        self.data = make_dataset(video_path_list,label_path_list,pose_path_list, sample_duration, step)
+        self.data = make_dataset(video_path_list,left_cutout_path_list,right_cutout_path_list,label_path_list,pose_path_list, sample_duration, step)
 
         self.spatial_transform = transforms.Compose([
                             transforms.Resize(image_size),
@@ -116,7 +118,7 @@ class Video(data.Dataset):
 
         self.one_hot_label = one_hot_label
         self.pose_label = pose_label
-
+        self.cutout_img = cutout_img
         self.temporal_transform = temporal_transform
         self.loader = get_loader()
 
@@ -138,8 +140,7 @@ class Video(data.Dataset):
 
         #clip
         clip = self.loader(path, frame_indices)
-        #空間的な後処理
-        if self.spatial_transform is not None:
+        if self.spatial_transform is not False:
             clip = [self.spatial_transform(img) for img in clip]
         #(sequence,channel,height,width)
         clip = torch.stack(clip, 0)
@@ -153,18 +154,40 @@ class Video(data.Dataset):
         l_path = self.data[index]['label']
         label = label_loader(l_path,frame_indices)
         label = torch.stack(label,0)
-        if self.one_hot_label is not None:
+        if self.one_hot_label is not False:
             label =  util.one_hot_2d(label,self.cl_num)
 
         #pose
-        if self.pose_label is not None:
+        if self.pose_label is not False:
             p_path = self.data[index]['pose']
             pose = pose_loader(p_path,frame_indices)
             pose = torch.stack(pose,0)
-        else:
-            pose=0
 
-        return clip,target,label,pose
+        if self.cutout_img is not False:
+            left_path = self.data[index]['left_cutout']
+            left_clip = self.loader(left_path, frame_indices)
+            if self.spatial_transform is not False:
+                 left_clip = [self.spatial_transform(img) for img in left_clip]
+            left_clip = torch.stack(left_clip, 0)
+            right_path = self.data[index]['right_cutout']
+            right_clip = self.loader(right_path, frame_indices)
+            if self.spatial_transform is not False:
+                 right_clip = [self.spatial_transform(img) for img in right_clip]
+            right_clip = torch.stack(right_clip, 0)
+
+            if self.pose_label is not False:
+                 return clip,left_clip,right_clip,target,label,pose
+
+            else:
+    
+                 return clip,left_clip,right_clip,target,label
+
+        else:
+             if self.pose_label is not False:
+                 return clip,target,label,pose
+
+             else:
+                 return clip,target,label
         
 
     def __len__(self):

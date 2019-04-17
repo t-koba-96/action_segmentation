@@ -33,7 +33,7 @@ def main():
      SETTING = Dict(yaml.safe_load(open(os.path.join('arguments',args.arg+'.yaml'))))
      device = torch.device(args.device)
 
-     video_path_list,label_path_list,pose_path_list = datas.train_path_list(SETTING.train_video_list)
+     video_path_list,_,__,label_path_list,pose_path_list = datas.train_path_list(SETTING.train_video_list)
      frameloader = dataset.Video(video_path_list,label_path_list,pose_path_list,
                                  SETTING.image_size,SETTING.clip_length,
                                  SETTING.slide_stride,SETTING.classes)

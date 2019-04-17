@@ -100,7 +100,7 @@ class twostream_tcn(nn.Module):
 
         self.avgpool =  nn.AdaptiveAvgPool2d((1,1))
 
-        self.img_tcn = tcn.Dilated_TCN(512,[256,128,64,32,class_num])
+        self.img_tcn = tcn.Dilated_TCN(516,[256,128,64,32,class_num])
 
         self.pose_tcn = tcn.Dilated_TCN(4,[256,128,64,32,class_num])
 
@@ -197,4 +197,49 @@ class dual_attention_tcn(nn.Module):
 
         x = torch.add(x,y)
 
+        return x
+
+
+# cutting out hand 
+class cutout_tcn(nn.Module):
+    def __init__(self,class_num):
+        super(cutout_tcn, self).__init__()
+        features = list(cnn.at_vgg(class_num).features)
+        self.features_1 = nn.ModuleList(features)
+
+        self.features_2 = nn.ModuleList(features)
+
+        self.avgpool =  nn.AdaptiveAvgPool2d((1,1))
+
+        self.tcn = tcn.Dilated_TCN(1024,[256,128,64,32,class_num])
+
+        self.attention = temporal_attention()
+        
+        
+    def forward(self, x , y):
+        
+        batch_size=x.size(0)
+        clip_length=x.size(1)
+        
+        x=x.view(-1,3,x.size(3),x.size(4))
+        for ii,model in enumerate(self.features_1):
+             x = model(x)
+        x = self.avgpool(x)
+        x = x.view(x.size(0) , -1)
+
+        y = y.view(-1,3,y.size(3),y.size(4))
+        for ii,model in enumerate(self.features_2):
+             y = model(y)
+        y = self.avgpool(y)
+        y = y.view(y.size(0) , -1)
+
+        x = torch.cat([x,y] , dim=1)
+            
+        # batch,clip,feature
+        x = x.view(batch_size,clip_length,-1).permute(0,2,1)
+        
+        x = self.tcn(x)
+
+        x = x.permute(0,2,1).view(-1,x.size(1))
+            
         return x
