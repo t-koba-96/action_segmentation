@@ -4,6 +4,8 @@ import torch
 def train_path_list(number):
 
     video_list=[]
+    l_cutout_list=[]
+    r_cutout_list=[]
     label_list=[]
     pose_list=[]
 
@@ -39,15 +41,19 @@ def train_path_list(number):
     
     for data in number:
        video_list.append(video_path_list[data-1])
+       l_cutout_list.append(left_cutout_path_list[data-1])
+       r_cutout_list.append(right_cutout_path_list[data-1])
        label_list.append(label_path_list[data-1])
        pose_list.append(pose_path_list[data-1])
 
-    return video_list,left_cutout_path_list,right_cutout_path_list,label_list,pose_list
+    return video_list,l_cutout_list,r_cutout_list,label_list,pose_list
 
 
 def test_path_list(number):
 
     video_list=[]
+    l_cutout_list=[]
+    r_cutout_list=[]
     label_list=[]
     pose_list=[]
 
@@ -83,10 +89,12 @@ def test_path_list(number):
 
     for data in number:
        video_list.append(video_path_list[data-1])
+       l_cutout_list.append(left_cutout_path_list[data-1])
+       r_cutout_list.append(right_cutout_path_list[data-1])
        label_list.append(label_path_list[data-1])
        pose_list.append(pose_path_list[data-1])
 
-    return video_list,left_cutout_path_list,right_cutout_path_list,label_list,pose_list
+    return video_list,l_cutout_list,r_cutout_list,label_list,pose_list
 
 def class_list():
     class_list=["n","tp","al","ac","ca","gd","as","hp","st","ch","co"]

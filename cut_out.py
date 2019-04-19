@@ -24,8 +24,12 @@ def cut_out_image(cutout,video_path_list,left_cutout_path_list,right_cutout_path
              os.makedirs(right_cutout_path_list[num])
         for i in range(dfa.shape[0]):
              im = Image.open(os.path.join(v_path,str(i).zfill(5)+".png"))
-             im.crop((dfa[i,0]/2-cutout, dfa[i,1]/2-cutout, dfa[i,0]/2+cutout, dfa[i,1]/2+cutout)).save(os.path.join(left_cutout_path_list[num],str(i).zfill(5)+".png"), quality=95)
-             im.crop((dfa[i,2]/2-cutout, dfa[i,3]/2-cutout, dfa[i,2]/2+cutout, dfa[i,3]/2+cutout)).save(os.path.join(right_cutout_path_list[num],str(i).zfill(5)+".png"), quality=95)
+             if num == 4:
+                im.crop((dfa[i,0]-cutout*2, dfa[i,1]-cutout*2, dfa[i,0]+cutout*2, dfa[i,1]+cutout*2)).save(os.path.join(left_cutout_path_list[num],str(i).zfill(5)+".png"), quality=95)
+                im.crop((dfa[i,2]-cutout*2, dfa[i,3]-cutout*2, dfa[i,2]+cutout*2, dfa[i,3]+cutout*2)).save(os.path.join(right_cutout_path_list[num],str(i).zfill(5)+".png"), quality=95)
+             else:
+                im.crop((dfa[i,0]/2-cutout, dfa[i,1]/2-cutout, dfa[i,0]/2+cutout, dfa[i,1]/2+cutout)).save(os.path.join(left_cutout_path_list[num],str(i).zfill(5)+".png"), quality=95)
+                im.crop((dfa[i,2]/2-cutout, dfa[i,3]/2-cutout, dfa[i,2]/2+cutout, dfa[i,3]/2+cutout)).save(os.path.join(right_cutout_path_list[num],str(i).zfill(5)+".png"), quality=95)
 
 def main():
      args = get_arguments()

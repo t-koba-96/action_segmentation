@@ -27,7 +27,7 @@ def accuracy(testloader,net,device,csv_path):
    return total,correct
 
 
-def create_data_csv(testloader,video_num,net,device,class_num,csv_name,two_stream=False):
+def create_data_csv(testloader,video_num,net,device,class_num,csv_name,cutout_img=False,two_stream=False):
    classes=[]
    correct_=[]
    total_=[]
@@ -40,13 +40,25 @@ def create_data_csv(testloader,video_num,net,device,class_num,csv_name,two_strea
 
    with torch.no_grad():
       for data in testloader:
-         images,targets,labels,poses=data
-         images = images.to(device)
-         if two_stream is not False:
-               poses = poses.to(device)
-               outputs = net(images,poses)
+         if cutout_img is not False:
+             images, left_img, right_img, targets, labels, poses = data
+             left_img, right_img, labels = left_img.to(device), right_img.to(device), labels.to(device)
          else:
-               outputs = net(images)
+             images, targets, labels, poses = data
+             images, labels = images.to(device), labels.to(device)
+         if two_stream is not False:
+             poses = poses.to(device)
+
+         if cutout_img is not False:
+             if two_stream is not False:
+                outputs = net(left_img,right_img,poses)
+             else:
+                outputs = net(left_img,right_img)
+         else:
+             if two_stream is not False:
+                outputs = net(images,poses)
+             else:
+                outputs = net(images)
          outputs=outputs.cpu()
          outputs=nn.Softmax(dim=1)(outputs)
          _,predicted=torch.max(outputs,1)
@@ -81,7 +93,7 @@ def create_data_csv(testloader,video_num,net,device,class_num,csv_name,two_strea
 
 
 
-def create_demo_csv(testloader,video_num,net,device,classes,csv_name,clip_length,two_stream=False):
+def create_demo_csv(testloader,video_num,net,device,classes,csv_name,clip_length,cutout_img=False,two_stream=False):
    num=[]
    Frame=[]
    c_s_l=[]
@@ -108,13 +120,25 @@ def create_demo_csv(testloader,video_num,net,device,classes,csv_name,clip_length
 
    with torch.no_grad():
       for i,data in enumerate(testloader):
-         images,targets,labels,poses=data
-         images = images.to(device)
-         if two_stream is not False:
-               poses = poses.to(device)
-               outputs = net(images,poses)
+         if cutout_img is not False:
+             images, left_img, right_img, targets, labels, poses = data
+             left_img, right_img, labels = left_img.to(device), right_img.to(device), labels.to(device)
          else:
-               outputs = net(images)
+             images, targets, labels, poses = data
+             images, labels = images.to(device), labels.to(device)
+         if two_stream is not False:
+             poses = poses.to(device)
+
+         if cutout_img is not False:
+             if two_stream is not False:
+                outputs = net(left_img,right_img,poses)
+             else:
+                outputs = net(left_img,right_img)
+         else:
+             if two_stream is not False:
+                outputs = net(images,poses)
+             else:
+                outputs = net(images)
          outputs=outputs.cpu()
          outputs=nn.Softmax(dim=1)(outputs)
          best_score,predicted=torch.max(outputs,1)
