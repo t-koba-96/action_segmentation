@@ -105,7 +105,7 @@ def pose_loader(pose_path,frame_indices):
 #datasetを作るクラス
 class Video(data.Dataset):
     def __init__(self, video_path_list,left_cutout_path_list,right_cutout_path_list,label_path_list,pose_path_list,image_size,sample_duration,step,
-                 class_num,one_hot_label=False,temporal_transform=False,get_loader=get_default_video_loader,cutout_img=False,pose_label=True):
+                 class_num,one_hot_label=False,temporal_transform=False,get_loader=get_default_video_loader,cutout_img=False,pose_label=False):
 
         self.data = make_dataset(video_path_list,left_cutout_path_list,right_cutout_path_list,label_path_list,pose_path_list, sample_duration, step)
 

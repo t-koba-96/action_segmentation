@@ -9,23 +9,6 @@ import matplotlib.pyplot as plt
 import torchvision.utils as vutils
 from matplotlib.gridspec import GridSpec,GridSpecFromSubplotSpec
 
-def accuracy(testloader,net,device,csv_path):
-   correct=0
-   total=0
-   with torch.no_grad():
-      for data in testloader:
-         images,targets,labels,poses=data
-         images = images.to(device)
-         outputs=net(images)
-         outputs=outputs.cpu()
-         outputs=nn.Softmax(dim=1)(outputs)
-         _,predicted=torch.max(outputs,1)
-         labels=labels.view(-1)
-         total += labels.size(0)
-         correct += (predicted == labels).sum().item()
-
-   return total,correct
-
 
 def create_data_csv(testloader,video_num,net,device,class_num,csv_name,cutout_img=False,two_stream=False):
    classes=[]
@@ -210,60 +193,6 @@ def create_demo_csv(testloader,video_num,net,device,classes,csv_name,clip_length
 
 
 
-def create_pose_csv(testloader,video_num,net,device,class_num,csv_name,two_stream=False):
-    lxp=[]
-    lyp=[]
-    rxp=[]
-    ryp=[]   
-    t_lxp=[]
-    t_lyp=[]
-    t_rxp=[]
-    t_ryp=[]   
-    np.set_printoptions(precision=2)
-
-    with torch.no_grad():
-       for data in testloader:
-          images,targets,labels,poses=data
-          images = images.to(device)
-          if two_stream is not False:
-             poses = poses.to(device)
-             outputs = net(images,poses)
-          else:
-             outputs = net(images)
-          outputs=outputs.cpu()
-          outputs[:,0]=(outputs[:,0]*1920)
-          outputs[:,1]=(outputs[:,1]*1080)
-          outputs[:,2]=(outputs[:,2]*1920)
-          outputs[:,3]=(outputs[:,3]*1080)
-          frame_num=outputs.size(0)
-          poses=poses.view(frame_num,-1)
-          poses_np=poses.numpy()
-          outputs_np=outputs.numpy()
-          for x in range(frame_num):
-             lxp.append(outputs_np[x,0])
-             lyp.append(outputs_np[x,1])
-             rxp.append(outputs_np[x,2])
-             ryp.append(outputs_np[x,3])
-             t_lxp.append(poses_np[x,0])
-             t_lyp.append(poses_np[x,1])
-             t_rxp.append(poses_np[x,2])
-             t_ryp.append(poses_np[x,3])
-
-    df = pd.DataFrame({
-                'lxp' : lxp,
-                'lyp' : lyp,
-                'rxp' : rxp,
-                'ryp' : ryp,
-                't_lxp' : t_lxp,
-                't_lyp' : t_lyp,
-                't_rxp' : t_rxp,
-                't_ryp' : t_ryp
-       })
-
-    df.to_csv(os.path.join("result","pose",csv_name+"_"+video_num+".csv"))
-
-
-
 def show_attention(testloader,video_num,net,device,save_name,two_stream=False):
 
    with torch.no_grad():
@@ -284,6 +213,7 @@ def show_attention(testloader,video_num,net,device,save_name,two_stream=False):
               heatmap = attention[x,:,:,:]
               make_attention_map(img,heatmap,video_num,f_num,save_name)
               f_num+=1
+
 
 
 def make_attention_map(img,heatmap,video_num,f_num,save_name):

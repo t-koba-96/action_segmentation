@@ -9,7 +9,7 @@ import argparse
 import yaml
 
 from addict import Dict
-from models import network,regression
+from models import network
 from utils import util,dataset,loader,train
 
 
@@ -38,13 +38,14 @@ def main():
          frameloader = dataset.Video(video_path_list,left_cutout_path_list,right_cutout_path_list,
                                              label_path_list,pose_path_list,
                                              SETTING.image_size,SETTING.clip_length,
-                                             SETTING.slide_stride,SETTING.classes,cutout_img=True)
+                                             SETTING.slide_stride,SETTING.classes,
+                                             cutout_img=True,pose_label=True)
 
      else:
          frameloader = dataset.Video(video_path_list,left_cutout_path_list,right_cutout_path_list,
                                      label_path_list,pose_path_list,
                                      SETTING.image_size,SETTING.clip_length,
-                                     SETTING.slide_stride,SETTING.classes)
+                                     SETTING.slide_stride,SETTING.classes,pose_label=True)
          
      trainloader = torch.utils.data.DataLoader(frameloader,batch_size=SETTING.batch_size,
                                                      shuffle=True,num_workers=SETTING.num_workers)
@@ -58,23 +59,12 @@ def main():
          optimizer=optim.Adam(net.parameters(),lr=SETTING.learning_rate,betas=(SETTING.beta1,0.999))
          train.model_train(trainloader,net,criterion,optimizer,device,SETTING.epoch,SETTING.save_file)
 
-
      elif SETTING.model == 'Twostream_TCN':
          net = network.twostream_tcn(SETTING.classes)
          net = nn.DataParallel(net)
          net = net.to(device)
          optimizer=optim.Adam(net.parameters(),lr=SETTING.learning_rate,betas=(SETTING.beta1,0.999))
          train.model_train(trainloader,net,criterion,optimizer,device,SETTING.epoch,SETTING.save_file,two_stream=True)
-
-     elif SETTING.model == 'Dual_Attention_TCN':
-         at_net = regression.r_at_vgg(SETTING.classes)
-         at_net=nn.DataParallel(at_net)
-         at_net.load_state_dict(torch.load(os.path.join("weight","reg",SETTING.save_file,SETTING.reg_batch+".pth")))
-         net = network.dual_attention_tcn(SETTING.classes,at_net)
-         net = nn.DataParallel(net)
-         net = net.to(device)
-         optimizer=optim.Adam(net.parameters(),lr=SETTING.learning_rate,betas=(SETTING.beta1,0.999))
-         train.model_train(trainloader,net,criterion,optimizer,device,SETTING.epoch,SETTING.save_file)
 
      elif SETTING.model == 'Cutout_TCN':
          net = network.cutout_tcn(SETTING.classes)

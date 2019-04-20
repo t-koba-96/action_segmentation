@@ -1,12 +1,10 @@
+
 #Saving , Loading File Name
 save_file: template
 
 
 #Model (Attention_TCN,Twostream_TCN,Dual_Attention_TCN)
 model: Dual_Attention_TCN
-
-#Regression model if using pose attention (Attention_VGG)
-reg_model: Attention_VGG
 
 
 #Dasaset setting
