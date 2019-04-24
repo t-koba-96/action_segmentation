@@ -46,9 +46,10 @@ def main():
          test_video_list.append(4)
      elif args.video == 'e':
          test_video_list.append(5)
-     video_path_list,_,__,label_path_list,pose_path_list = datas.test_path_list(test_video_list)
+     video_path_list,left_cutout_path_list,right_cutout_path_list,label_path_list,pose_path_list = datas.test_path_list(test_video_list)
 
-     frameloader = dataset.Video(video_path_list,label_path_list,pose_path_list,
+     frameloader = dataset.Video(video_path_list,left_cutout_path_list,right_cutout_path_list,
+                                 label_path_list,pose_path_list,
                                  SETTING.image_size,SETTING.clip_length,
                                  SETTING.clip_length,SETTING.classes,pose_label=True)
                                  
@@ -71,7 +72,7 @@ def main():
      at_net = cnn.attention_net(net)
      at_net = at_net.to(device)
      at_net.eval()
-     test.show_attention(testloader,args.video,at_net,device,SETTING.save_file,two_stream=False)
+     test.show_attention(testloader,args.video,at_net,device,SETTING.save_file,SETTING.clip_length,two_stream=False)
 
 
 if __name__ == '__main__':

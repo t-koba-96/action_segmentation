@@ -7,10 +7,11 @@ from . import util
 import cv2
 import matplotlib.pyplot as plt
 import torchvision.utils as vutils
+import matplotlib.patches as patches
 from matplotlib.gridspec import GridSpec,GridSpecFromSubplotSpec
 
 
-def create_data_csv(testloader,video_num,net,device,class_num,csv_name,cutout_img=False,two_stream=False):
+def create_data_csv(testloader,video_num,net,device,class_num,csv_name,cutout_img=False,two_stream=False,posemap=False):
    classes=[]
    correct_=[]
    total_=[]
@@ -25,12 +26,30 @@ def create_data_csv(testloader,video_num,net,device,class_num,csv_name,cutout_im
       for data in testloader:
          if cutout_img is not False:
              images, left_img, right_img, targets, labels, poses = data
-             left_img, right_img, labels = left_img.to(device), right_img.to(device), labels.to(device)
+             left_img, right_img = left_img.to(device), right_img.to(device)
          else:
              images, targets, labels, poses = data
-             images, labels = images.to(device), labels.to(device)
+             images = images.to(device)
          if two_stream is not False:
-             poses = poses.to(device)
+             if posemap is not False:
+                poses=poses.view(-1,4)
+                posemap=[]
+                for x in range(poses.size(0)):
+                   map=torch.from_numpy(util.pose_map(poses[x,:],224,31))
+                   posemap.append(map)
+                posemap = torch.stack(posemap, 0).view(-1,1,224,224)
+                posemap = posemap.to(device)
+             else:
+                poses = poses.to(device)
+         if posemap is not False:
+             if two_stream is False:
+                poses=poses.view(-1,4)
+                posemap=[]
+                for x in range(poses.size(0)):
+                   map=torch.from_numpy(cv2.resize(util.pose_map(poses[x,:],224,251),(112,112)))
+                   posemap.append(map)
+                posemap = torch.stack(posemap, 0).view(-1,1,112,112)
+                posemap = posemap.to(device)
 
          if cutout_img is not False:
              if two_stream is not False:
@@ -39,9 +58,13 @@ def create_data_csv(testloader,video_num,net,device,class_num,csv_name,cutout_im
                 outputs = net(left_img,right_img)
          else:
              if two_stream is not False:
-                outputs = net(images,poses)
+                if posemap is False: 
+                   outputs = net(images,poses)
+             elif posemap is not False:
+                outputs = net(images,posemap)
              else:
                 outputs = net(images)
+
          outputs=outputs.cpu()
          outputs=nn.Softmax(dim=1)(outputs)
          _,predicted=torch.max(outputs,1)
@@ -76,7 +99,7 @@ def create_data_csv(testloader,video_num,net,device,class_num,csv_name,cutout_im
 
 
 
-def create_demo_csv(testloader,video_num,net,device,classes,csv_name,clip_length,cutout_img=False,two_stream=False):
+def create_demo_csv(testloader,video_num,net,device,classes,csv_name,clip_length,cutout_img=False,two_stream=False,posemap=False):
    num=[]
    Frame=[]
    c_s_l=[]
@@ -105,12 +128,30 @@ def create_demo_csv(testloader,video_num,net,device,classes,csv_name,clip_length
       for i,data in enumerate(testloader):
          if cutout_img is not False:
              images, left_img, right_img, targets, labels, poses = data
-             left_img, right_img, labels = left_img.to(device), right_img.to(device), labels.to(device)
+             left_img, right_img = left_img.to(device), right_img.to(device)
          else:
              images, targets, labels, poses = data
-             images, labels = images.to(device), labels.to(device)
+             images = images.to(device)
          if two_stream is not False:
-             poses = poses.to(device)
+             if posemap is not False:
+                poses=poses.view(-1,4)
+                posemap=[]
+                for x in range(poses.size(0)):
+                   map=torch.from_numpy(util.pose_map(poses[x,:],224,31))
+                   posemap.append(map)
+                posemap = torch.stack(posemap, 0).view(-1,1,224,224)
+                posemap = posemap.to(device)
+             else:
+                poses = poses.to(device)
+         if posemap is not False:
+             if two_stream is False:
+                poses=poses.view(-1,4)
+                posemap=[]
+                for x in range(poses.size(0)):
+                   map=torch.from_numpy(cv2.resize(util.pose_map(poses[x,:],224,251),(112,112)))
+                   posemap.append(map)
+                posemap = torch.stack(posemap, 0).view(-1,1,112,112)
+                posemap = posemap.to(device)
 
          if cutout_img is not False:
              if two_stream is not False:
@@ -119,9 +160,13 @@ def create_demo_csv(testloader,video_num,net,device,classes,csv_name,clip_length
                 outputs = net(left_img,right_img)
          else:
              if two_stream is not False:
-                outputs = net(images,poses)
+                if posemap is False:
+                   outputs = net(images,poses)
+             elif posemap is not False:
+                outputs = net(images,posemap)
              else:
                 outputs = net(images)
+
          outputs=outputs.cpu()
          outputs=nn.Softmax(dim=1)(outputs)
          best_score,predicted=torch.max(outputs,1)
@@ -193,7 +238,7 @@ def create_demo_csv(testloader,video_num,net,device,classes,csv_name,clip_length
 
 
 
-def show_attention(testloader,video_num,net,device,save_name,two_stream=False):
+def show_attention(testloader,video_num,net,device,save_name,clip_length,two_stream=False):
 
    with torch.no_grad():
       for i,data in enumerate(testloader):
@@ -213,8 +258,13 @@ def show_attention(testloader,video_num,net,device,save_name,two_stream=False):
               heatmap = attention[x,:,:,:]
               make_attention_map(img,heatmap,video_num,f_num,save_name)
               f_num+=1
-
-
+   empty=2400%clip_length
+   num=empty
+   for x in range(empty):
+      f_name=2400-num
+      empty_im = cv2.imread("../../../local/dataset/work_detect/empty.png")
+      cv2.imwrite(os.path.join("../../../demo/images/attention",save_name+"_"+video_num,str(f_name).zfill(5)+".png"), empty_im)
+      num -=1
 
 def make_attention_map(img,heatmap,video_num,f_num,save_name):
     #attention map
@@ -223,14 +273,12 @@ def make_attention_map(img,heatmap,video_num,f_num,save_name):
     heatmap = util.normalize_heatmap(heatmap)
     # 元の画像と同じサイズになるようにヒートマップのサイズを変更
     heatmap = cv2.resize(heatmap, (img.shape[1], img.shape[0]))
-    #特徴ベクトルを256スケール化
     heatmap = np.uint8(255 * heatmap)
-    # RGBに変更
     heatmap = cv2.applyColorMap(heatmap, cv2.COLORMAP_JET)
-    #戻す
+    heatmap = cv2.cvtColor(heatmap, cv2.COLOR_BGR2RGB)
     heatmap=heatmap/255
-    # 0.5はヒートマップの強度係数
-    s_img = heatmap * 0.5 + img
+    # heatmap * image
+    s_img = heatmap * 0.7 + img
     #plt
     fig=plt.figure(figsize=(16,10))
     gs = GridSpec(4,5,left=0.13,right=0.9) 
@@ -246,7 +294,10 @@ def make_attention_map(img,heatmap,video_num,f_num,save_name):
     gs_3 = GridSpecFromSubplotSpec(nrows=2, ncols=2, subplot_spec=gs[2:4, 3:5])
     fig.add_subplot(gs_3[:,:])
     util.delete_line()
-    plt.imshow(heatmap)
+    plt.imshow(heatmap,cmap='jet')
+    plt.clim(0,1)
+    plt.colorbar()
+
 
     # Make the directory if it doesn't exist.
     SAVE_PATH = "../../../demo/images/attention"
@@ -255,5 +306,4 @@ def make_attention_map(img,heatmap,video_num,f_num,save_name):
       
     plt.savefig(os.path.join(SAVE_PATH,save_name+"_"+video_num,str(f_num).zfill(5)+".png"))
     plt.close()
-   
  

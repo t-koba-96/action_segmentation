@@ -50,31 +50,23 @@ def main():
 
      if SETTING.model == 'Cutout_TCN':
          frameloader = dataset.Video(video_path_list,left_cutout_path_list,right_cutout_path_list,
-                                             label_path_list,pose_path_list,
-                                             SETTING.image_size,SETTING.clip_length,
-                                             SETTING.slide_stride,SETTING.classes,
-                                             cutout_img=True,pose_label=True)
+                                     label_path_list,pose_path_list,
+                                     SETTING.image_size,SETTING.clip_length,
+                                     SETTING.clip_length,SETTING.classes,
+                                     cutout_img=True,pose_label=True)
 
      else:
          frameloader = dataset.Video(video_path_list,left_cutout_path_list,right_cutout_path_list,
                                      label_path_list,pose_path_list,
                                      SETTING.image_size,SETTING.clip_length,
-                                     SETTING.slide_stride,SETTING.classes,pose_label=True)
+                                     SETTING.clip_length,SETTING.classes,pose_label=True)
 
    
      testloader = torch.utils.data.DataLoader(frameloader,batch_size=SETTING.batch_size,
                                              shuffle=False,num_workers=SETTING.num_workers)
 
-     if SETTING.model == 'Attention_TCN':
-         net = network.attention_tcn(SETTING.classes)
-         net = nn.DataParallel(net)
-         net.load_state_dict(torch.load(os.path.join("weight","main",SETTING.save_file,SETTING.main_batch+".pth")))
-         net = net.to(device)
-         net.eval()
-         test.create_data_csv(testloader,args.video,net,device,SETTING.classes,SETTING.save_file)
-         test.create_demo_csv(testloader,args.video,net,device,classes,SETTING.save_file,SETTING.clip_length)
-
-     elif SETTING.model == 'Twostream_TCN':
+     
+     if SETTING.model == 'Twostream_TCN':
          net = network.twostream_tcn(SETTING.classes)
          net = nn.DataParallel(net)
          net.load_state_dict(torch.load(os.path.join("weight","main",SETTING.save_file,SETTING.main_batch+".pth")))
@@ -82,6 +74,15 @@ def main():
          net.eval()
          test.create_data_csv(testloader,args.video,net,device,SETTING.classes,SETTING.save_file,two_stream=True)
          test.create_demo_csv(testloader,args.video,net,device,classes,SETTING.save_file,SETTING.clip_length,two_stream=True)
+         
+     elif SETTING.model == 'Posemap_TCN':
+         net = network.posemap_tcn(SETTING.classes)
+         net = nn.DataParallel(net)
+         net.load_state_dict(torch.load(os.path.join("weight","main",SETTING.save_file,SETTING.main_batch+".pth")))
+         net = net.to(device)
+         net.eval()
+         test.create_data_csv(testloader,args.video,net,device,SETTING.classes,SETTING.save_file,posemap=True)
+         test.create_demo_csv(testloader,args.video,net,device,classes,SETTING.save_file,SETTING.clip_length,posemap=True)
 
      elif SETTING.model == 'Cutout_TCN':
          net = network.cutout_tcn(SETTING.classes)
@@ -91,6 +92,21 @@ def main():
          net.eval()
          test.create_data_csv(testloader,args.video,net,device,SETTING.classes,SETTING.save_file,cutout_img=True)
          test.create_demo_csv(testloader,args.video,net,device,classes,SETTING.save_file,SETTING.clip_length,cutout_img=True)
+    
+     else:
+         if SETTING.model == 'VGG_TCN':
+             net = network.vgg_tcn()
+         elif SETTING.model == 'Attention_TCN':
+             net = network.attention_tcn(SETTING.classes)
+         elif SETTING.model == 'Resnet_TCN':
+             net = network.resnet_tcn(SETTING.classes)
+         net = nn.DataParallel(net)
+         net.load_state_dict(torch.load(os.path.join("weight","main",SETTING.save_file,SETTING.main_batch+".pth")))
+         net = net.to(device)
+         net.eval()
+         test.create_data_csv(testloader,args.video,net,device,SETTING.classes,SETTING.save_file)
+         test.create_demo_csv(testloader,args.video,net,device,classes,SETTING.save_file,SETTING.clip_length)
+
 
 if __name__ == '__main__':
     main()

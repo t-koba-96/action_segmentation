@@ -9,7 +9,8 @@ model: Dual_Attention_TCN
 
 #Dasaset setting
 classes: 11
-train_video_list: [1,2,3,4] 
+test_video_list: [1,2]
+train_video_list: [3,4,5] 
 
 
 #Dataloader setting
@@ -28,8 +29,7 @@ beta1: 0.5
 
 #which batches weight using
 main_batch: finish
-#if using regression model
-reg_batch: finish
+
 
 
 
