@@ -1,3 +1,10 @@
+# 2020/5/1
+
+This repository is not used anymore.
+
+Check [TCNmodels reimplementation](https://github.com/t-koba-96/TCNModels) or [TCN with pose features](https://github.com/t-koba-96/End-to-end-Action-Segmentation-with-pose).
+
+
 # Action Segmentation for fine-grained action videos  
 
 ## Dataset directory  
